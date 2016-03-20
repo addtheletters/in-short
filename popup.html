@@ -8,11 +8,11 @@
   <head>
     <title>Getting Started Extension's Popup</title>
     <style>
-      #status {
+      .status {
         /* avoid an excessively wide status text */
         white-space: pre;
         text-overflow: ellipsis;
-        max-width: 400px;
+        width: 600px;
         font-size: 10pt;
       }
     </style>
@@ -24,14 +24,16 @@
       -
       - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
      -->
-    <script src="popup.js"></script>
+     <script type="text/javascript" src="numeric-1.2.6.js"></script>
+     <script type="text/javascript" src="lsi.js"></script>
+     <script type="text/javascript" src="test_lsi.js"></script>
+     <!-- <script src="popup.js"></script> -->
   </head>
 
   <body>
-    <p>HELLO EVERYON! MY NAME IS FUN TEXT BOX OF FUN.</p>
-
-    Where are the diffs?
-    <div id="status"></div>
+    <textarea rows="30" cols="60" id="lsi-status" class="status"></textarea>
+    <br>
+    <div id="status" class="status"></div>
     <img id="image-result" hidden>
   </body>
 </html>
