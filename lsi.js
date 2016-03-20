@@ -161,7 +161,7 @@ var numeric = numeric || {};
 		return tdm;
 	};
 
-	lib.getLocalWeights = function(tdm, weight_func = lib.weight.local.term_freq){
+	lib.getLocalWeights = function(tdm, weight_func = lib.weight.local.log){
 		var lwm = [];
 		for(var i = 0; i < tdm.ROWS; i++){
 			lwm[i] = [];
@@ -181,10 +181,10 @@ var numeric = numeric || {};
 	};
 
 	lib.applyWeights = function(tdm, lwf = lib.weight.local.log, gwf = lib.weight.global.entropy){
-		console.log("local func is", lwf);
-		console.log("global func is", gwf);
+		// console.log("local func is", lwf);
+		// console.log("global func is", gwf);
 		// console.log("composite func is", lib.weight.getCompositeFunc(lwf,gwf));
-		console.log("local weights after are", lib.getLocalWeights(tdm, lib.weight.getCompositeFunc(lwf, gwf)));
+		// console.log("local weights after are", numeric.prettyPrint(lib.getLocalWeights(tdm, lib.weight.getCompositeFunc(lwf, gwf))));
 		return lib.getLocalWeights(tdm, lib.weight.getCompositeFunc(lwf, gwf));
 	};
 
@@ -195,17 +195,24 @@ var numeric = numeric || {};
 		}
 		var decomp = numeric.svd( matrix );
 		var reduced;
-		var rsvd = {S:[], U:[], V:[]};
+		decomp.Vt = numeric.transpose(decomp.V);
+		var rsvd = {S:[], U:[], V:[], Vt:[]};
 		if(rank >= decomp.S.length){
 			console.log("rank is larger than original rank");
 		}
-		for(var i = 0; i < decomp.S.length && i <= rank; i++){
+		for(var i = 0; i < decomp.S.length && i < rank; i++){
 			rsvd.S.push( decomp.S[i] );
 			rsvd.U.push( decomp.U[i] );
-			rsvd.V.push( decomp.V[i] );
+			rsvd.Vt.push( decomp.Vt[i] );
 		}
+		rsvd.V = numeric.transpose(rsvd.Vt);
+		// console.log("v transpose", numeric.prettyPrint(numeric.transpose(rsvd.V)));
+		// console.log("s diagonal", numeric.prettyPrint(numeric.diag(rsvd.S)));
+		// console.log("first product", numeric.prettyPrint(numeric.dot( numeric.diag(rsvd.S), numeric.transpose(rsvd.V) )));
 		reduced = numeric.dot( rsvd.U, numeric.dot( numeric.diag(rsvd.S), numeric.transpose(rsvd.V) ));
 		reduced.svd = rsvd;
+		console.log("original", numeric.prettyPrint(decomp));
+		console.log("reduced", numeric.prettyPrint(rsvd));
 		return reduced;
 	};
 

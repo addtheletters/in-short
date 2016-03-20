@@ -9,9 +9,11 @@ function test_ordunion(){
 
 function test_tdm(){
 	var docs = [
-		" r by r singular values matrix S, and a n by r concept-document vector matrix, D, which satisfy the following relations:",
-		" S is a computed r by r diagonal matrix of decreasing singular values, and D is a computed n by r matrix of document vectors.",
-		" and other undesirable artifacts of the original space of A. This reduced set of matrices is often denoted with a modified formula such as:"
+		"r by r singular values matrix S, and a n by r concept-document vector matrix, D, which satisfy the following relations:",
+		"S is a computed r by r diagonal matrix of decreasing singular values, and D is a computed n by r matrix of document vectors.",
+		"and other undesirable artifacts of the original space of A. This reduced set of matrices is often denoted with a modified formula such as:",
+		"To do the latter, you must first translate your query into the low-dimensional space. It is then intuitive the same transformation",
+		"Note here that the inverse of the diagonal matrix sigma_k may be found by inverting each nonzero value within the matrix."
 	];
 	return lsi.createTDM(docs);
 }
@@ -42,10 +44,10 @@ function test_rsvd(){
 	var tdm = test_tdm();
 	var gw = lsi.getGlobalWeights(tdm);
 	var lw = lsi.getLocalWeights(tdm);
-	console.log("global");
-	console.log(numeric.prettyPrint(gw));
-	console.log("local");
-	console.log(numeric.prettyPrint(lw));
+	// console.log("global");
+	// console.log(numeric.prettyPrint(gw));
+	// console.log("local");
+	// console.log(numeric.prettyPrint(lw));
 	//return lsi.applyWeights( tdm );
 	return lsi.lowRankApprox( lsi.applyWeights( test_tdm() ), 2 );
 }
