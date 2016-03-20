@@ -209,7 +209,7 @@ var numeric = numeric || {};
 		// console.log("v transpose", numeric.prettyPrint(numeric.transpose(rsvd.V)));
 		// console.log("s diagonal", numeric.prettyPrint(numeric.diag(rsvd.S)));
 		// console.log("first product", numeric.prettyPrint(numeric.dot( numeric.diag(rsvd.S), numeric.transpose(rsvd.V) )));
-		reduced = numeric.dot( rsvd.U, numeric.dot( numeric.diag(rsvd.S), numeric.transpose(rsvd.V) ));
+		reduced = numeric.dot( rsvd.U, numeric.dot( numeric.diag(rsvd.S), rsvd.Vt ));
 		reduced.svd = rsvd;
 		console.log("original", numeric.prettyPrint(decomp));
 		console.log("reduced", numeric.prettyPrint(rsvd));

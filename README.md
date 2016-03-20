@@ -1,2 +1,2 @@
 # in-short
-Experimenting with chrome extension capabilities.
+Experimenting with LSI, NLP, random proc-gen nonsense, and Chrome extension capabilities.
