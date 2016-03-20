@@ -38,14 +38,27 @@ function test_tdidf(){
 	return tfidf;
 }
 
+function test_rsvd(){
+	var tdm = test_tdm();
+	var gw = lsi.getGlobalWeights(tdm);
+	var lw = lsi.getLocalWeights(tdm);
+	console.log("global");
+	console.log(numeric.prettyPrint(gw));
+	console.log("local");
+	console.log(numeric.prettyPrint(lw));
+	//return lsi.applyWeights( tdm );
+	return lsi.lowRankApprox( lsi.applyWeights( test_tdm() ), 2 );
+}
+
 function render(lsi_info_out){
 	document.getElementById('lsi-status').textContent = lsi_info_out;
 }
 
+var last_result;
 document.addEventListener('DOMContentLoaded', function() {
 	var report = "";
-	var result = test_tdidf();//test_lwm();
-	console.log(numeric.prettyPrint(result));
-	report     += numeric.prettyPrint(result);
+	last_result = test_rsvd();//test_lwm();
+	console.log(numeric.prettyPrint(last_result));
+	report     += numeric.prettyPrint(last_result);
 	render(report);
 });

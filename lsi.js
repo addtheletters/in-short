@@ -37,11 +37,19 @@ var numeric = numeric || {};
 
 	lib.weight = lib.weight || {};
 
+	lib.weight.debug = function(){
+		return 2;
+	}
+
 	lib.weight.binary = function(value){
 		if(value){
 			return 1;
 		}
 		return 0;
+	};
+
+	lib.weight.getCompositeFunc = function(local_func, global_func){
+		return (tdm, row, col)=>(local_func(tdm, row, col) * global_func(tdm, row));
 	};
 
 	lib.weight.local = lib.weight.local || {};
@@ -58,10 +66,6 @@ var numeric = numeric || {};
 	// the most commonly used local weight adjustment
 	lib.weight.local.log = function(tdm, row, col){
 		return Math.log((tdm[row][col] || 0) + 1);
-	};
-
-	lib.weight.local.tfidf = function(tdm, row, col){
-		return lib.weight.local.term_freq(tdm, row, col) * lib.weight.global.inv_doc_freq(tdm, row);
 	};
 
 	lib.weight.global = lib.weight.global || {};
@@ -86,21 +90,28 @@ var numeric = numeric || {};
 
 	// aka idf, inverse document frequency, name made longer to avoid accidents with dfi
 	lib.weight.global.inv_doc_freq = function(tdm, row){
-		console.log("dfi", lib.weight.global.dfi(tdm, row));
-		console.log("num docs", tdm.COLS);
+		//console.log("dfi", lib.weight.global.dfi(tdm, row));
+		//console.log("num docs", tdm.COLS);
 		return Math.log2(tdm.COLS / (1 + lib.weight.global.dfi(tdm, row)));
 	};
+
+	lib.weight.local.tfidf = lib.weight.getCompositeFunc(lib.weight.local.term_freq, lib.weight.global.inv_doc_freq);
 
 	// the most commonly used global weight adjustment
 	lib.weight.global.entropy = function(tdm, row) {
 		var term_gfi = lib.weight.global.gfi(tdm, row);
+		// console.log("term gfi", term_gfi);
 		return 1 + lib.util.sum( tdm[row], (count)=>{
+			// console.log("tfi", count);
 			var p = (count || 0) / term_gfi;
-			console.log("p",p);
-			console.log("p log", Math.log(p));
-			console.log("num docs", tdm.COLS);
-			console.log("num docs log", Math.log(tdm.COLS));
-			// when p is zero, this result becomes NaN, perhaps should be interpreted as infinity
+			if(p == 0){
+				return 0;
+			}
+			// console.log("p",p);
+			// console.log("p log", Math.log(p));
+			// console.log("num docs", tdm.COLS);
+			// console.log("num docs log", Math.log(tdm.COLS));
+			// when p is zero or infinity, this result becomes NaN, perhaps should be interpreted as infinity
 			return p * Math.log(p) / Math.log( tdm.COLS );
 		} );
 	};
@@ -167,6 +178,35 @@ var numeric = numeric || {};
 			weights[i] = weight_func(tdm, i);
 		}
 		return weights;
+	};
+
+	lib.applyWeights = function(tdm, lwf = lib.weight.local.log, gwf = lib.weight.global.entropy){
+		console.log("local func is", lwf);
+		console.log("global func is", gwf);
+		// console.log("composite func is", lib.weight.getCompositeFunc(lwf,gwf));
+		console.log("local weights after are", lib.getLocalWeights(tdm, lib.weight.getCompositeFunc(lwf, gwf)));
+		return lib.getLocalWeights(tdm, lib.weight.getCompositeFunc(lwf, gwf));
+	};
+
+	lib.lowRankApprox = function(matrix, rank){
+		if(rank <= 0){
+			console.log("rank for low rank approximation is invalid or zero");
+			return;// new Array(rank).fill([]);	
+		}
+		var decomp = numeric.svd( matrix );
+		var reduced;
+		var rsvd = {S:[], U:[], V:[]};
+		if(rank >= decomp.S.length){
+			console.log("rank is larger than original rank");
+		}
+		for(var i = 0; i < decomp.S.length && i <= rank; i++){
+			rsvd.S.push( decomp.S[i] );
+			rsvd.U.push( decomp.U[i] );
+			rsvd.V.push( decomp.V[i] );
+		}
+		reduced = numeric.dot( rsvd.U, numeric.dot( numeric.diag(rsvd.S), numeric.transpose(rsvd.V) ));
+		reduced.svd = rsvd;
+		return reduced;
 	};
 
 })(lsi);
