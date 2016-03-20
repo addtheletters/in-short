@@ -50,13 +50,18 @@ var numeric = numeric || {};
 		return this.weight.binary(tdm[row][col]);
 	};
 
+	// frequency: how many times does this term appear in each document
 	lib.weight.local.term_freq = function(tdm, row, col){
 		return tdm[row][col] || 0;
 	};
 
-	// the most commonly used
+	// the most commonly used local weight adjustment
 	lib.weight.local.log = function(tdm, row, col){
 		return Math.log((tdm[row][col] || 0) + 1);
+	};
+
+	lib.weight.local.tfidf = function(tdm, row, col){
+		return lib.weight.local.term_freq(tdm, row, col) * lib.weight.global.inv_doc_freq(tdm, row);
 	};
 
 	lib.weight.global = lib.weight.global || {};
@@ -69,34 +74,34 @@ var numeric = numeric || {};
 		return 1 / Math.sqrt( lib.util.sum(tdm[row], (count)=>((count * count) || 0) ) );
 	};
 
-	// how many times does this term appear in all documents
+	// global freqeuncy: how many times does this term appear in all documents
 	lib.weight.global.gfi = function(tdm, row){
 		return lib.util.sum( tdm[row] );
 	};
 
-	// in how many documents does this term appear
+	// document frequency: in how many documents does this term appear
 	lib.weight.global.dfi = function(tdm, row){
 		return lib.util.sum( tdm[row], lib.weight.binary );
 	};
 
-	// aka idf, inverse document frequency
+	// aka idf, inverse document frequency, name made longer to avoid accidents with dfi
 	lib.weight.global.inv_doc_freq = function(tdm, row){
 		console.log("dfi", lib.weight.global.dfi(tdm, row));
-		console.log("num docs", tdm.MAT_COLS);
-		return Math.log2(tdm.MAT_COLS / (1 + lib.weight.global.dfi(tdm, row)));
+		console.log("num docs", tdm.COLS);
+		return Math.log2(tdm.COLS / (1 + lib.weight.global.dfi(tdm, row)));
 	};
 
-	// the most commonly used
+	// the most commonly used global weight adjustment
 	lib.weight.global.entropy = function(tdm, row) {
 		var term_gfi = lib.weight.global.gfi(tdm, row);
 		return 1 + lib.util.sum( tdm[row], (count)=>{
 			var p = (count || 0) / term_gfi;
 			console.log("p",p);
 			console.log("p log", Math.log(p));
-			console.log("num docs", tdm.MAT_COLS);
-			console.log("num docs log", Math.log(tdm.MAT_COLS));
+			console.log("num docs", tdm.COLS);
+			console.log("num docs log", Math.log(tdm.COLS));
 			// when p is zero, this result becomes NaN, perhaps should be interpreted as infinity
-			return p * Math.log(p) / Math.log( tdm.MAT_COLS );
+			return p * Math.log(p) / Math.log( tdm.COLS );
 		} );
 	};
 
@@ -125,32 +130,31 @@ var numeric = numeric || {};
 		var allterms = [];
 		var tdm = [];
 		
-		for(var i = 0; i < docs.length; i++){
-			var tms = lib.findTerms(docs[i]);
+		for(var col = 0; col < docs.length; col++){
+			var tms = lib.findTerms(docs[col]);
 			allterms = lib.util.ordUnion(allterms, tms);
 			var count = lib.countTerms(tms);
 			//var local_weight = lib.weighTerms(tms, lib.weight.log);
 			//console.log("weight",local_weight);
-
-			for(var j = 0; j < tms.length; j++){
-				var row = allterms.indexOf(tms[j]);
+			for(var row = 0; row < allterms.length; row++){
 				if(typeof tdm[row] === "undefined"){
-					tdm[row] = [];
+					tdm[row] = new Array( docs.length ).fill(0); // this is slow
 				}
-				tdm[row][i] = count[tms[j]]
+				tdm[row][col] = count[allterms[row]] || 0;
 			}
 		}
 
-		tdm.MAT_ROWS = allterms.length; // number of terms
-		tdm.MAT_COLS = docs.length;		// number of documents
+		tdm.ROWS = allterms.length; // number of terms
+		tdm.COLS = docs.length;		// number of documents
+		tdm.TERMS = allterms;		// attach the terms (yay javascript)
 		return tdm;
 	};
 
 	lib.getLocalWeights = function(tdm, weight_func = lib.weight.local.term_freq){
 		var lwm = [];
-		for(var i = 0; i < tdm.MAT_ROWS; i++){
+		for(var i = 0; i < tdm.ROWS; i++){
 			lwm[i] = [];
-			for(var j = 0; j < tdm.MAT_COLS; j++){
+			for(var j = 0; j < tdm.COLS; j++){
 				lwm[i][j] = weight_func(tdm, i, j);
 			}
 		}
@@ -159,7 +163,7 @@ var numeric = numeric || {};
 
 	lib.getGlobalWeights = function(tdm, weight_func = lib.weight.global.entropy){
 		var weights = [];
-		for(var i = 0; i < tdm.MAT_ROWS; i++){
+		for(var i = 0; i < tdm.ROWS; i++){
 			weights[i] = weight_func(tdm, i);
 		}
 		return weights;

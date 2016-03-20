@@ -21,11 +21,21 @@ function test_lwm(){
 }
 
 function test_gwm(){
-	return lsi.getGlobalWeights(test_tdm(), lsi.weight.global.inv_doc_freq);
+	return lsi.getGlobalWeights(test_tdm(), lsi.weight.global.gfi);
 }
 
 function test_svd(){
-	return numeric.svd(test_tdm()); // doesn't converge :(
+	return numeric.svd(test_tdm());
+}
+
+function test_tdidf(){
+	var tdm    = test_tdm();
+	var tf     = lsi.getLocalWeights(tdm);
+	var idf    = lsi.getGlobalWeights(tdm, lsi.weight.global.inv_doc_freq);
+	var tfidf  = lsi.getLocalWeights(tdm, lsi.weight.local.tfidf);
+	console.log(numeric.prettyPrint(tf));
+	console.log(numeric.prettyPrint(idf));
+	return tfidf;
 }
 
 function render(lsi_info_out){
@@ -34,7 +44,7 @@ function render(lsi_info_out){
 
 document.addEventListener('DOMContentLoaded', function() {
 	var report = "";
-	var result = test_svd();//test_lwm();
+	var result = test_tdidf();//test_lwm();
 	console.log(numeric.prettyPrint(result));
 	report     += numeric.prettyPrint(result);
 	render(report);
