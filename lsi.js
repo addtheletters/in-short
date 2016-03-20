@@ -22,29 +22,82 @@ var numeric = numeric || {};
 	    return ret;
 	};
 
+	lib.util.sum = function( arr, valueFunc ){
+		valueFunc = valueFunc || ((item) => item || 0);
+		var total = 0;
+		for(var i = 0, n = arr.length; i < n; ++i ){
+		    total += valueFunc(arr[i]);
+		}
+		return total;
+	};
+
 	lib.findTerms = function(text){
 		return text.match(/\S+/g); // match non-whitespace
 	};
 
 	lib.weight = lib.weight || {};
 
-	lib.weight.binary = function(tdm, row, col){
-		if(tdm[row][col]){
+	lib.weight.binary = function(value){
+		if(value){
 			return 1;
 		}
 		return 0;
 	};
 
-	lib.weight.term_freq = function(tdm, row, col){
+	lib.weight.local = lib.weight.local || {};
+
+	lib.weight.local.binary = function(tdm, row, col){
+		return this.weight.binary(tdm[row][col]);
+	};
+
+	lib.weight.local.term_freq = function(tdm, row, col){
 		return tdm[row][col] || 0;
 	};
 
-	lib.weight.log = function(tdm, row, col){
+	// the most commonly used
+	lib.weight.local.log = function(tdm, row, col){
 		return Math.log((tdm[row][col] || 0) + 1);
 	};
 
-	lib.weight.normal = function(tdm, row, col){
-		
+	lib.weight.global = lib.weight.global || {};
+
+	lib.weight.global.binary = function(tdm, row){
+		return 1;
+	};
+
+	lib.weight.global.normal = function(tdm, row){
+		return 1 / Math.sqrt( lib.util.sum(tdm[row], (count)=>((count * count) || 0) ) );
+	};
+
+	// how many times does this term appear in all documents
+	lib.weight.global.gfi = function(tdm, row){
+		return lib.util.sum( tdm[row] );
+	};
+
+	// in how many documents does this term appear
+	lib.weight.global.dfi = function(tdm, row){
+		return lib.util.sum( tdm[row], lib.weight.binary );
+	};
+
+	// aka idf, inverse document frequency
+	lib.weight.global.inv_doc_freq = function(tdm, row){
+		console.log("dfi", lib.weight.global.dfi(tdm, row));
+		console.log("num docs", tdm.MAT_COLS);
+		return Math.log2(tdm.MAT_COLS / (1 + lib.weight.global.dfi(tdm, row)));
+	};
+
+	// the most commonly used
+	lib.weight.global.entropy = function(tdm, row) {
+		var term_gfi = lib.weight.global.gfi(tdm, row);
+		return 1 + lib.util.sum( tdm[row], (count)=>{
+			var p = (count || 0) / term_gfi;
+			console.log("p",p);
+			console.log("p log", Math.log(p));
+			console.log("num docs", tdm.MAT_COLS);
+			console.log("num docs log", Math.log(tdm.MAT_COLS));
+			// when p is zero, this result becomes NaN, perhaps should be interpreted as infinity
+			return p * Math.log(p) / Math.log( tdm.MAT_COLS );
+		} );
 	};
 
 	lib.countTerms = function(terms){
@@ -88,13 +141,13 @@ var numeric = numeric || {};
 			}
 		}
 
-		tdm.MAT_ROWS = allterms.length;
-		tdm.MAT_COLS = docs.length;
+		tdm.MAT_ROWS = allterms.length; // number of terms
+		tdm.MAT_COLS = docs.length;		// number of documents
 		return tdm;
 	};
 
-	lib.getWeights = function(tdm, weight_func = lib.weight.term_freq){
-		var lwm = []
+	lib.getLocalWeights = function(tdm, weight_func = lib.weight.local.term_freq){
+		var lwm = [];
 		for(var i = 0; i < tdm.MAT_ROWS; i++){
 			lwm[i] = [];
 			for(var j = 0; j < tdm.MAT_COLS; j++){
@@ -102,6 +155,14 @@ var numeric = numeric || {};
 			}
 		}
 		return lwm;
+	};
+
+	lib.getGlobalWeights = function(tdm, weight_func = lib.weight.global.entropy){
+		var weights = [];
+		for(var i = 0; i < tdm.MAT_ROWS; i++){
+			weights[i] = weight_func(tdm, i);
+		}
+		return weights;
 	};
 
 })(lsi);

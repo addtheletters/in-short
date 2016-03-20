@@ -17,8 +17,16 @@ function test_tdm(){
 }
 
 function test_lwm(){
-	return lsi.getWeights(test_tdm(), lsi.weight.log);
-};
+	return lsi.getLocalWeights(test_tdm(), lsi.weight.local.log);
+}
+
+function test_gwm(){
+	return lsi.getGlobalWeights(test_tdm(), lsi.weight.global.inv_doc_freq);
+}
+
+function test_svd(){
+	return numeric.svd(test_tdm()); // doesn't converge :(
+}
 
 function render(lsi_info_out){
 	document.getElementById('lsi-status').textContent = lsi_info_out;
@@ -26,7 +34,7 @@ function render(lsi_info_out){
 
 document.addEventListener('DOMContentLoaded', function() {
 	var report = "";
-	var result = test_lwm();
+	var result = test_svd();//test_lwm();
 	console.log(numeric.prettyPrint(result));
 	report     += numeric.prettyPrint(result);
 	render(report);
