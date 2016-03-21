@@ -2,6 +2,8 @@ var lsi = lsi || {};
 
 // using numeric.js from http://www.numericjs.com/
 var numeric = numeric || {};
+// using js implementation of Porter Stemmer from https://github.com/kristopolous/Porter-Stemmer
+var stemmer = stemmer || {};
 
 (function(lib){
 
@@ -32,7 +34,18 @@ var numeric = numeric || {};
 	};
 
 	lib.findTerms = function(text){
-		return text.match(/\S+/g); // match non-whitespace
+		return lib.stemWords(
+			text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g) // remove punctuation
+				.match(/\S+/g)							 // match non-whitespace
+		); 
+	};
+
+	lib.stemWords = function(words){
+		var stems = [];
+		for(var i = 0; i < words.length; i++){
+			stems.push( stemmer(words[i]) );
+		}
+		return stems;
 	};
 
 	lib.weight = lib.weight || {};
@@ -136,13 +149,6 @@ var numeric = numeric || {};
 	// 	}
 	// 	return weight;
 	// };
-	
-	lib.stemWords = function(words){
-		var stems = [];
-		for(var i = 0; i < words.length; i++){
-			stems.push(  );
-		}
-	};
 
 	lib.createTDM = function(docs) {
 		var allterms = [];
@@ -150,6 +156,8 @@ var numeric = numeric || {};
 		
 		for(var col = 0; col < docs.length; col++){
 			var tms = lib.findTerms(docs[col]);
+			docs[col].DOC_TERMS = tms;
+
 			allterms = lib.util.ordUnion(allterms, tms);
 			var count = lib.countTerms(tms);
 			//var local_weight = lib.weighTerms(tms, lib.weight.log);
