@@ -26,7 +26,7 @@ var numeric = numeric || {};
 		valueFunc = valueFunc || ((item) => item || 0);
 		var total = 0;
 		for(var i = 0, n = arr.length; i < n; ++i ){
-		    total += valueFunc(arr[i]);
+		    total += valueFunc(arr[i], i);
 		}
 		return total;
 	};
@@ -158,6 +158,7 @@ var numeric = numeric || {};
 		tdm.ROWS = allterms.length; // number of terms
 		tdm.COLS = docs.length;		// number of documents
 		tdm.TERMS = allterms;		// attach the terms (yay javascript)
+		tdm.DOCS = docs;			// attach the docs
 		return tdm;
 	};
 
@@ -195,25 +196,46 @@ var numeric = numeric || {};
 		}
 		var decomp = numeric.svd( matrix );
 		var reduced;
+		decomp.Ut = numeric.transpose(decomp.U);
 		decomp.Vt = numeric.transpose(decomp.V);
-		var rsvd = {S:[], U:[], V:[], Vt:[]};
+		var rsvd = {S:[], U:[], Ut:[], V:[], Vt:[]};
 		if(rank >= decomp.S.length){
 			console.log("rank is larger than original rank");
 		}
 		for(var i = 0; i < decomp.S.length && i < rank; i++){
 			rsvd.S.push( decomp.S[i] );
-			rsvd.U.push( decomp.U[i] );
+			rsvd.Ut.push( decomp.Ut[i] );
 			rsvd.Vt.push( decomp.Vt[i] );
 		}
+		rsvd.U = numeric.transpose(rsvd.Ut);
 		rsvd.V = numeric.transpose(rsvd.Vt);
 		// console.log("v transpose", numeric.prettyPrint(numeric.transpose(rsvd.V)));
 		// console.log("s diagonal", numeric.prettyPrint(numeric.diag(rsvd.S)));
 		// console.log("first product", numeric.prettyPrint(numeric.dot( numeric.diag(rsvd.S), numeric.transpose(rsvd.V) )));
 		reduced = numeric.dot( rsvd.U, numeric.dot( numeric.diag(rsvd.S), rsvd.Vt ));
 		reduced.svd = rsvd;
-		console.log("original", numeric.prettyPrint(decomp));
-		console.log("reduced", numeric.prettyPrint(rsvd));
+		//console.log("original", numeric.prettyPrint(decomp));
+		//console.log("reduced", numeric.prettyPrint(rsvd));
 		return reduced;
+	};
+
+	// based on method outlined here:
+	// http://www.kiv.zcu.cz/~jstein/publikace/isim2004.pdf
+	lib.rankDocs = function(decomp, docs){
+		var ranks = [];
+		for(var k = 0; k < decomp.S.length; k++){
+			ranks.push( {
+				val:Math.sqrt( lib.util.sum(decomp.V[k], (val,i)=>( val * val * decomp.S[i] * decomp.S[i])) ),
+				doc_index:k,
+				content:null
+			} );
+		}
+		if(docs){
+			for(var i = 0; i < ranks.length; i++){
+				ranks[i].content = docs[ranks[i].doc_index];
+			}
+		}
+		return ranks.sort((a,b)=>(a.val-b.val)).reverse();
 	};
 
 })(lsi);

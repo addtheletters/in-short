@@ -10,38 +10,40 @@ function test_ordunion(){
 function test_tdm(){
 	var docs = [
 		"r by r singular values matrix S, and a n by r concept-document vector matrix, D, which satisfy the following relations:",
-		"S is a computed r by r diagonal matrix of decreasing singular values, and D is a computed n by r matrix of document vectors.",
-		"and other undesirable artifacts of the original space of A. This reduced set of matrices is often denoted with a modified formula such as:",
+		"banana S is a computed r by r diagonal matrix of decreasing singular values, and D is a computed n by r matrix of document vectors.",
+		"banana and other undesirable artifacts of the original space of A. This reduced set of matrices is often denoted with a modified formula such as:",
 		"To do the latter, you must first translate your query into the low-dimensional space. It is then intuitive the same transformation",
-		"Note here that the inverse of the diagonal matrix sigma_k may be found by inverting each nonzero value within the matrix."
+		"Note here that the inverse of the diagonal matrix may be found by inverting each nonzero value within the matrix.",
+		"Cat ran over the shiddly bat wat mat",
+		"Cat had the value of matrix n ranked as a banana"
 	];
 	return lsi.createTDM(docs);
 }
 
-function test_lwm(){
-	return lsi.getLocalWeights(test_tdm(), lsi.weight.local.log);
+function test_lwm(itdm){
+	return lsi.getLocalWeights(itdm || test_tdm(), lsi.weight.local.log);
 }
 
-function test_gwm(){
-	return lsi.getGlobalWeights(test_tdm(), lsi.weight.global.gfi);
+function test_gwm(itdm){
+	return lsi.getGlobalWeights(itdm || test_tdm(), lsi.weight.global.gfi);
 }
 
-function test_svd(){
-	return numeric.svd(test_tdm());
+function test_svd(itdm){
+	return numeric.svd(itdm || test_tdm());
 }
 
-function test_tdidf(){
-	var tdm    = test_tdm();
+function test_tdidf(itdm){
+	var tdm    = itdm || test_tdm();
 	var tf     = lsi.getLocalWeights(tdm);
 	var idf    = lsi.getGlobalWeights(tdm, lsi.weight.global.inv_doc_freq);
 	var tfidf  = lsi.getLocalWeights(tdm, lsi.weight.local.tfidf);
-	console.log(numeric.prettyPrint(tf));
-	console.log(numeric.prettyPrint(idf));
+	//console.log(numeric.prettyPrint(tf));
+	//console.log(numeric.prettyPrint(idf));
 	return tfidf;
 }
 
-function test_rsvd(){
-	var tdm = test_tdm();
+function test_rsvd(itdm){
+	var tdm = itdm || test_tdm();
 	var gw = lsi.getGlobalWeights(tdm);
 	var lw = lsi.getLocalWeights(tdm);
 	// console.log("global");
@@ -49,7 +51,14 @@ function test_rsvd(){
 	// console.log("local");
 	// console.log(numeric.prettyPrint(lw));
 	//return lsi.applyWeights( tdm );
-	return lsi.lowRankApprox( lsi.applyWeights( test_tdm() ), 2 );
+	return lsi.lowRankApprox( lsi.applyWeights( test_tdm() ), 3 );
+}
+
+function test_rank(itdm){
+	var tdm = itdm || test_tdm();
+	var decomp = test_svd(tdm); // test_rsvd().svd;
+	var ret = lsi.rankDocs(decomp, tdm.DOCS);
+	return ret;
 }
 
 function render(lsi_info_out){
@@ -59,7 +68,7 @@ function render(lsi_info_out){
 var last_result;
 document.addEventListener('DOMContentLoaded', function() {
 	var report = "";
-	last_result = test_rsvd();//test_lwm();
+	last_result = test_rank();//test_lwm();
 	console.log(numeric.prettyPrint(last_result));
 	report     += numeric.prettyPrint(last_result);
 	render(report);
