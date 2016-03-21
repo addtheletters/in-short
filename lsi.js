@@ -136,6 +136,13 @@ var numeric = numeric || {};
 	// 	}
 	// 	return weight;
 	// };
+	
+	lib.stemWords = function(words){
+		var stems = [];
+		for(var i = 0; i < words.length; i++){
+			stems.push(  );
+		}
+	};
 
 	lib.createTDM = function(docs) {
 		var allterms = [];
@@ -219,21 +226,33 @@ var numeric = numeric || {};
 		return reduced;
 	};
 
+	lib.identifyContent = function(to_id, contents){
+		for(var i = 0; i < to_id.length; i++){
+			to_id[i].content = contents[to_id[i].index];
+		}
+	};
+
 	// based on method outlined here:
 	// http://www.kiv.zcu.cz/~jstein/publikace/isim2004.pdf
 	lib.rankDocs = function(decomp, docs){
+		return lib._globalRank(decomp, docs, (k)=>Math.sqrt(lib.util.sum(decomp.V[k], (val,i)=>( val * val * decomp.S[i] * decomp.S[i]))));		
+	};
+
+	lib.rankTerms = function(decomp, terms){
+		return lib._globalRank(decomp, terms, (k)=>Math.sqrt(lib.util.sum(decomp.U[k], (val,i)=>( val * val * decomp.S[i] * decomp.S[i]))));
+	};
+
+	lib._globalRank = function(decomp, terms, val_func){
 		var ranks = [];
 		for(var k = 0; k < decomp.S.length; k++){
 			ranks.push( {
-				val:Math.sqrt( lib.util.sum(decomp.V[k], (val,i)=>( val * val * decomp.S[i] * decomp.S[i])) ),
-				doc_index:k,
+				val: val_func(k),//Math.sqrt( lib.util.sum(decomp.V[k], (val,i)=>( val * val * decomp.S[i] * decomp.S[i])) ),
+				index:k,
 				content:null
 			} );
 		}
-		if(docs){
-			for(var i = 0; i < ranks.length; i++){
-				ranks[i].content = docs[ranks[i].doc_index];
-			}
+		if(terms){
+			lib.identifyContent(ranks, terms);
 		}
 		return ranks.sort((a,b)=>(a.val-b.val)).reverse();
 	};

@@ -57,7 +57,7 @@ function test_rsvd(itdm){
 function test_rank(itdm){
 	var tdm = itdm || test_tdm();
 	var decomp = test_svd(tdm); // test_rsvd().svd;
-	var ret = lsi.rankDocs(decomp, tdm.DOCS);
+	var ret = lsi.rankTerms(decomp, tdm.TERMS);
 	return ret;
 }
 
