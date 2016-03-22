@@ -35,8 +35,7 @@ var stemmer = stemmer || {};
 
 	lib.findTerms = function(text, dict){
 		return lib.stemWords(
-			text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g) // remove punctuation
-				.match(/\S+/g),						 	// match non-whitespace
+			text.match(/\S+/g),	// match non-whitespace
 			dict
 		); 
 	};
@@ -45,9 +44,10 @@ var stemmer = stemmer || {};
 		var stems = [];
 		var stem_dict = dict || {};
 		for(var i = 0; i < words.length; i++){
-			stems.push( stemmer(words[i]) );
+			stems.push( stemmer(words[i]).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") ); // remove punctuation from stems
 			if(!stem_dict[stems[i]] || stem_dict[stems[i]].length > words[i].length){
 				stem_dict[stems[i]] = words[i];
+				console.log(words[i]);
 			}
 		}
 		stems.dict = stem_dict;
@@ -249,17 +249,27 @@ var stemmer = stemmer || {};
 		}
 	};
 
+	lib.frobeniusNormFunc = function(multiplier, sigma){
+		return (k)=>Math.sqrt(lib.util.sum(multiplier[k], (val,i)=>( val * val * sigma[i] * sigma[i])));
+	};
+
+	lib.frobeniusNormOne = function(sigma){
+		return Math.sqrt(lib.util.sum(sigma, (val)=>(val * val)));
+	};
+
 	// based on method outlined here:
 	// http://www.kiv.zcu.cz/~jstein/publikace/isim2004.pdf
 	lib.rankDocs = function(decomp, docs){
-		return lib._globalRank(decomp, docs, (k)=>Math.sqrt(lib.util.sum(decomp.V[k], (val,i)=>( val * val * decomp.S[i] * decomp.S[i]))));		
+		return lib._globalRank(decomp, docs, lib.frobeniusNormFunc(decomp.V, decomp.S));		
 	};
 
 	lib.rankTerms = function(decomp, terms, sw_lookup){
-		var gr = lib._globalRank(decomp, terms, (k)=>Math.sqrt(lib.util.sum(decomp.U[k], (val,i)=>( val * val * decomp.S[i] * decomp.S[i]))));
+		var gr = lib._globalRank(decomp, terms, lib.frobeniusNormFunc(decomp.U, decomp.S));
 		if(sw_lookup){
 			for(var i = 0; i < gr.length; i++){
 				gr[i].original = sw_lookup[gr[i].content];
+				console.log(gr[i].content);
+				console.log(sw_lookup[gr[i].content]);
 			}
 		}
 		return gr;

@@ -15,7 +15,8 @@ function test_tdm(){
 		"To do the latter, you must first translate your query into the low-dimensional space. It is then intuitive the same transformation",
 		"Note here that the inverse of the diagonal matrix may be found by inverting each nonzero value within the matrix.",
 		"Cat ran over the shiddly bat wat mat",
-		"Cat had the value of matrix n ranked as a banana"
+		"Cat had the value of matrix n ranked as a banana",
+		"lol singular values are made of cheese and banana pudding is delicious. Did I tell you the relations satisfied by the vectors are bad?"
 	];
 	return lsi.createTDM(docs);
 }
@@ -51,14 +52,20 @@ function test_rsvd(itdm){
 	// console.log("local");
 	// console.log(numeric.prettyPrint(lw));
 	//return lsi.applyWeights( tdm );
-	return lsi.lowRankApprox( lsi.applyWeights( test_tdm() ), 3 );
+	return lsi.lowRankApprox( lsi.applyWeights( test_tdm() ), Math.ceil( Math.log(test_norm()) ) );
 }
 
 function test_rank(itdm){
 	var tdm = itdm || test_tdm();
-	var decomp = test_svd(tdm); // test_rsvd().svd;
-	var ret = lsi.rankTerms(decomp, tdm.TERMS, tdm.STEM_WORD_LOOKUP);
+	var decomp = test_rsvd(tdm).svd;
+	var ret = lsi.rankDocs(decomp, tdm.DOCS);//lsi.rankTerms(decomp, tdm.TERMS, tdm.STEM_WORD_LOOKUP);
 	return ret;
+}
+
+function test_norm(isvd){
+	var svd = isvd || test_svd();
+	var norm = lsi.frobeniusNormOne(svd.S);
+	return norm;
 }
 
 function render(lsi_info_out){
