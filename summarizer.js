@@ -16,13 +16,37 @@ var stemmer = stemmer || {};
 		var reduced = lsi.lowRankApprox(tdm, r_dim || norm, svd);
 		var ranking = lsi.rankDocs(reduced.svd, sentences);
 		var important = ranking.filter((val, i)=>{return i<(length || norm)});
-		var out = "";
+		var out = {};
+		out.string = "";
 		for(var i = 0; i < important.length; i++){
-			if(i>0) out += " ";
-			out += important[i].content;
+			if(i>0) out.string += " ";
+			out.string += important[i].content;
 		}
 		console.log(reduced);
 		console.log(numeric.prettyPrint(reduced));
+
+		out.sentences = sentences;
+		out.tdm = tdm;
+		out.norm = norm;
+		out.reduced = reduced;
+		out.ranking = ranking;
 		return out;
 	};
+
+	lib.useCurrentTabText = function( callback, use_func ){
+		chrome.tabs.executeScript(null, {file: "content_sum.js"});
+		chrome.tabs.getSelected(null, function(tab) {
+			chrome.tabs.sendMessage(tab.id, message={method: "getText"}, sendResponse=function(response) {
+			    if(response.method=="getText"){
+		            alltext = response.data;
+		            callback( use_func(alltext) );
+		        }
+			});
+	    });
+	};
+
+	lib.summarizeCurrentTab = function( callback ){
+		lib.useCurrentTabText( callback, lib.summarize );
+	};
+
 })(summarizer);

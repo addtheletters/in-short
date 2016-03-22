@@ -58,7 +58,7 @@ var stemmer = stemmer || {};
 		// /[^\.!\?]+[\.!\?$]+/g  // previous regex doing just pre-punctuation bits
 		// matches sentences ended with normal punctuation, isolated parentheticals with no punctuation nearby,
 		// independent lines lacking punctuation, and anything left before the end
-		return str.match( /(\([^\(\)]+\))|([^\r\n.!?]+([.!?]+|$))/gim ).map( (stnce)=>( stnce.replace(/\s+/g, " ").trim()) );
+		return str.match( /(\([^\(\)]+\))|([^\r\n.!?]+([.!?]+|$))/gim ).map( (stnce)=>( stnce.replace(/\s+/g, " ").trim()) ).filter( (val)=>(val) );
 	};
 
 	lib.weight = lib.weight || {};
