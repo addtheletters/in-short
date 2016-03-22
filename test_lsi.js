@@ -98,10 +98,10 @@ function render(lsi_info_out){
 
 var last_result;
 document.addEventListener('DOMContentLoaded', function() {
-	var report = "";
-	last_result = test_summary();//test_lwm();
-	console.log(numeric.prettyPrint(last_result));
-	report     += numeric.prettyPrint(last_result);
-	render(report);
-	// test_tab_summary();
+	var report  = "";
+	// last_result = test_summary();//test_lwm();
+	// console.log(numeric.prettyPrint(last_result));
+	// report     += numeric.prettyPrint(last_result);
+	// render(report);
+	test_tab_summary();
 });

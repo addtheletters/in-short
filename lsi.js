@@ -220,6 +220,11 @@ var stemmer = stemmer || {};
 		return lib.getLocalWeights(tdm, lib.weight.getCompositeFunc(lwf, gwf));
 	};
 
+	lib.chooseLowRank = function(tdm, svd){
+		var norm = Math.log(lib.frobeniusNormOne(svd.S));
+		return Math.max(norm, Math.min(tdm.DOCS.length / 100, 5) );
+	};
+
 	lib.lowRankApprox = function(matrix, rank, svd){
 		if(rank <= 0){
 			console.log("rank for low rank approximation is invalid or zero");
@@ -284,7 +289,7 @@ var stemmer = stemmer || {};
 
 	lib._globalRank = function(decomp, terms, val_func){
 		var ranks = [];
-		for(var k = 0; k < decomp.S.length; k++){
+		for(var k = 0; k < terms.length; k++){
 			ranks.push( {
 				val: val_func(k),//Math.sqrt( lib.util.sum(decomp.V[k], (val,i)=>( val * val * decomp.S[i] * decomp.S[i])) ),
 				index:k,
