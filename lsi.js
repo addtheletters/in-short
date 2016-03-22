@@ -33,18 +33,24 @@ var stemmer = stemmer || {};
 		return total;
 	};
 
-	lib.findTerms = function(text){
+	lib.findTerms = function(text, dict){
 		return lib.stemWords(
 			text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g) // remove punctuation
-				.match(/\S+/g)							 // match non-whitespace
+				.match(/\S+/g),						 	// match non-whitespace
+			dict
 		); 
 	};
 
-	lib.stemWords = function(words){
+	lib.stemWords = function(words, dict){
 		var stems = [];
+		var stem_dict = dict || {};
 		for(var i = 0; i < words.length; i++){
 			stems.push( stemmer(words[i]) );
+			if(!stem_dict[stems[i]] || stem_dict[stems[i]].length > words[i].length){
+				stem_dict[stems[i]] = words[i];
+			}
 		}
+		stems.dict = stem_dict;
 		return stems;
 	};
 
@@ -153,9 +159,10 @@ var stemmer = stemmer || {};
 	lib.createTDM = function(docs) {
 		var allterms = [];
 		var tdm = [];
+		var stem_dict = {};
 		
 		for(var col = 0; col < docs.length; col++){
-			var tms = lib.findTerms(docs[col]);
+			var tms = lib.findTerms(docs[col], stem_dict);
 			docs[col].DOC_TERMS = tms;
 
 			allterms = lib.util.ordUnion(allterms, tms);
@@ -174,6 +181,8 @@ var stemmer = stemmer || {};
 		tdm.COLS = docs.length;		// number of documents
 		tdm.TERMS = allterms;		// attach the terms (yay javascript)
 		tdm.DOCS = docs;			// attach the docs
+		tdm.STEM_WORD_LOOKUP = stem_dict;
+		console.log(stem_dict);
 		return tdm;
 	};
 
@@ -246,8 +255,14 @@ var stemmer = stemmer || {};
 		return lib._globalRank(decomp, docs, (k)=>Math.sqrt(lib.util.sum(decomp.V[k], (val,i)=>( val * val * decomp.S[i] * decomp.S[i]))));		
 	};
 
-	lib.rankTerms = function(decomp, terms){
-		return lib._globalRank(decomp, terms, (k)=>Math.sqrt(lib.util.sum(decomp.U[k], (val,i)=>( val * val * decomp.S[i] * decomp.S[i]))));
+	lib.rankTerms = function(decomp, terms, sw_lookup){
+		var gr = lib._globalRank(decomp, terms, (k)=>Math.sqrt(lib.util.sum(decomp.U[k], (val,i)=>( val * val * decomp.S[i] * decomp.S[i]))));
+		if(sw_lookup){
+			for(var i = 0; i < gr.length; i++){
+				gr[i].original = sw_lookup[gr[i].content];
+			}
+		}
+		return gr;
 	};
 
 	lib._globalRank = function(decomp, terms, val_func){
