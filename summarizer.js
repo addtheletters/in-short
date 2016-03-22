@@ -17,6 +17,14 @@ var stemmer = stemmer || {};
 		var reduced = lsi.lowRankApprox(tdm, frdim, svd);
 		var ranking = lsi.rankDocs(reduced.svd, sentences);
 		var important = ranking.filter((val, i)=>{return i<(length || norm)});
+		console.log("unsorted important", important);
+		important = important.sort( (a, b)=>{
+			//console.log("b content index", sentences.indexOf(b.content));
+			//console.log("a content index", sentences.indexOf(a.content));
+			return sentences.indexOf(a.content) - sentences.indexOf(b.content);
+		} );
+		console.log("sorted important", important);
+
 		var out = {};
 		out.string = "";
 		for(var i = 0; i < important.length; i++){
@@ -31,6 +39,7 @@ var stemmer = stemmer || {};
 		out.norm = norm;
 		out.reduced = reduced;
 		out.ranking = ranking;
+		out.original = doc;
 		return out;
 	};
 
