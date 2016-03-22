@@ -28,7 +28,7 @@ var stemmer = stemmer || {};
 		valueFunc = valueFunc || ((item) => item || 0);
 		var total = 0;
 		for(var i = 0, n = arr.length; i < n; ++i ){
-		    total += valueFunc(arr[i], i);
+		    total += valueFunc(arr[i], i, arr);
 		}
 		return total;
 	};
@@ -47,11 +47,18 @@ var stemmer = stemmer || {};
 			stems.push( stemmer(words[i]).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") ); // remove punctuation from stems
 			if(!stem_dict[stems[i]] || stem_dict[stems[i]].length > words[i].length){
 				stem_dict[stems[i]] = words[i];
-				console.log(words[i]);
+				//console.log(words[i]);
 			}
 		}
 		stems.dict = stem_dict;
 		return stems;
+	};
+
+	lib.splitSentences = function(str){
+		// /[^\.!\?]+[\.!\?$]+/g  // previous regex doing just pre-punctuation bits
+		// matches sentences ended with normal punctuation, isolated parentheticals with no punctuation nearby,
+		// independent lines lacking punctuation, and anything left before the end
+		return str.match( /(\([^\(\)]+\))|([^\r\n.!?]+([.!?]+|$))/gim ).map( (stnce)=>( stnce.replace(/\s+/g, " ").trim()) );
 	};
 
 	lib.weight = lib.weight || {};
@@ -182,7 +189,7 @@ var stemmer = stemmer || {};
 		tdm.TERMS = allterms;		// attach the terms (yay javascript)
 		tdm.DOCS = docs;			// attach the docs
 		tdm.STEM_WORD_LOOKUP = stem_dict;
-		console.log(stem_dict);
+		//console.log(stem_dict);
 		return tdm;
 	};
 
@@ -213,12 +220,12 @@ var stemmer = stemmer || {};
 		return lib.getLocalWeights(tdm, lib.weight.getCompositeFunc(lwf, gwf));
 	};
 
-	lib.lowRankApprox = function(matrix, rank){
+	lib.lowRankApprox = function(matrix, rank, svd){
 		if(rank <= 0){
 			console.log("rank for low rank approximation is invalid or zero");
 			return;// new Array(rank).fill([]);	
 		}
-		var decomp = numeric.svd( matrix );
+		var decomp = svd || numeric.svd( matrix );
 		var reduced;
 		decomp.Ut = numeric.transpose(decomp.U);
 		decomp.Vt = numeric.transpose(decomp.V);
@@ -268,8 +275,8 @@ var stemmer = stemmer || {};
 		if(sw_lookup){
 			for(var i = 0; i < gr.length; i++){
 				gr[i].original = sw_lookup[gr[i].content];
-				console.log(gr[i].content);
-				console.log(sw_lookup[gr[i].content]);
+				//console.log(gr[i].content);
+				//console.log(sw_lookup[gr[i].content]);
 			}
 		}
 		return gr;

@@ -68,6 +68,22 @@ function test_norm(isvd){
 	return norm;
 }
 
+var big_text = "r by r singular values matrix S, and a n by r concept-document vector matrix, D, which satisfy the following relations:"
+		+"\n banana S is a computed r by r diagonal matrix of decreasing singular values, and D is a computed n by r matrix of document vectors."
+		+" banana and other undesirable artifacts of the original space of A. This reduced set of matrices is often denoted with a modified formula such as:"
+		+" To do the latter, you must first translate your query into the low-dimensional space. It is then intuitive the same transformation"
+		+" Note here that the inverse of the diagonal matrix may be found by inverting each nonzero value within the matrix."
+		+" Cat ran over the shiddly bat wat mat"
+		+" Cat had the value of matrix n ranked as a banana"
+		+" lol singular values are made of cheese and banana pudding is delicious. Did I tell you the relations satisfied by the vectors are bad?"
+		+"\n HEY! HEY, LISTEN! I'm talking to you, here. Cat. Yes, you, you stupid reduced matrix of intuitive vector document length."
+		+"\n Someone should give me an award for how relevant and precise these original sentences are."
+		+"\n It's really a miracle that the singular values of these sentences wait that makes no matrix sense darn.";
+
+function test_summary(){
+	return summarizer.summarize(big_text);	
+}
+
 function render(lsi_info_out){
 	document.getElementById('lsi-status').textContent = lsi_info_out;
 }
@@ -75,7 +91,7 @@ function render(lsi_info_out){
 var last_result;
 document.addEventListener('DOMContentLoaded', function() {
 	var report = "";
-	last_result = test_rank();//test_lwm();
+	last_result = test_summary();//test_lwm();
 	console.log(numeric.prettyPrint(last_result));
 	report     += numeric.prettyPrint(last_result);
 	render(report);
