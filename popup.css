@@ -1,6 +1,9 @@
 body {
     font-family: monospace;
-    font-size: 25px;
+    font-size: 18px;
+}
+button{
+    font-family: monospace;
 }
 .centered {
     position: relative;
@@ -11,7 +14,7 @@ body {
     text-align: center;
 }
 .faded{
-    transition: visibility 0s 2s, opacity 5s ease;
+    transition: visibility 0s 2s, opacity 1.5s ease;
     opacity:0;
     visibility: hidden;
 }
@@ -23,6 +26,9 @@ body {
 }
 .disabled{
     background-color: rgba(210, 0, 0, .6);
+}
+.transitive{
+    transition: 1s ease;
 }
 label{
     transition: 1s ease;

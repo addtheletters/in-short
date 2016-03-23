@@ -6,16 +6,8 @@
  -->
 <html>
   <head>
-    <title>Summarization Widget-Like Popup</title>
+    <title>Debug Summarization Popup</title>
     <link rel="stylesheet" type="text/css" href="popup.css">
-    <style type="text/css">
-      body{
-        width: 500px
-      }
-      button{
-        font-size: 18pt
-      }
-    </style>
 
     <!--
       - JavaScript and HTML must be in separate files: see our Content Security
@@ -27,19 +19,12 @@
      <script type="text/javascript" src="PorterStemmer1980.js"></script>
      <script type="text/javascript" src="lsi.js"></script>
      <script type="text/javascript" src="summarizer.js"></script>
-     <script type="text/javascript" src="summary_popup.js"></script>
-     
+     <script type="text/javascript" src="test_lsi.js"></script>
+     <!-- <script src="popup.js"></script> -->
   </head>
 
   <body>
-    <div class="centered">
-    <h2>~ Page Information ~</h2>
-    <hr>
-    <label id="diffbot-query-indicator" class="info disabled indicator">[Querying diffbot API...]</label>
-    <div id="page-info" class="transitive">  </div>
-    <hr>
-    <button id="summary-button">Summarize this page!</button>
-    </div>
+    <textarea rows="30" cols="100" id="lsi-status"></textarea>
   </body>
 </html>
 
