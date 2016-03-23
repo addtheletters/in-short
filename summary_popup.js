@@ -6,10 +6,27 @@ function hideLoadIndicator( indicator_id, loadedText ){
     ld.innerHTML = replacetext;
     ld.classList.remove("disabled");
     ld.classList.add("enabled");
-    setTimeout( function(){ ld.classList.add("faded") }, 1500 );
-    //setTimeout( function(){ ld }, 4000 )
+    setTimeout( function(){ ld.classList.add("faded") }, 1000 );
+}
+
+function fillContent( container_id, content ){
+	var elm = document.getElementById(container_id);
+	elm.innerHTML = content;
+	elm.classList.remove("faded");
+}
+
+function requestSummary( text ){
+	summarizer.summarizeWithWorker( text, onSummaryDone );
+}
+
+function onSummaryDone( summary_data ){
+	fillContent( "summary-box", summary_data.summary );
+
 }
 
 document.addEventListener('DOMContentLoaded', function(){
-	document.getElementById("summary-button").onclick = function(){hideLoadIndicator('diffbot-query-indicator', '[Response received!]')};
+	document.getElementById("summary-button").onclick = function(){
+		requestSummary("HELLO SIR! MY NAME IS BOB. I HAVE A CAT. HE LIKES TO MEOW. MEOW MEOW MIX IS MY FAVORITE CAT FOOD. I AM DEFINITELY NOT A CAT.");
+		//function(){hideLoadIndicator('diffbot-query-indicator', '[Response received!]')};
+	}
 });

@@ -27,10 +27,10 @@ var stemmer = stemmer || {};
 		console.log("sorted important", important);
 
 		var out = {};
-		out.string = "";
+		out.summary = "";
 		for(var i = 0; i < important.length; i++){
-			if(i>0) out.string += " ";
-			out.string += important[i].content;
+			if(i>0) out.summary += " ";
+			out.summary += important[i].content;
 		}
 		console.log(reduced);
 		console.log(numeric.prettyPrint(reduced));
