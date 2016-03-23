@@ -8,12 +8,13 @@ var numeric = numeric || {};
 var stemmer = stemmer || {};
 
 (function(lib){
-	lib.summarize = function(doc, length, r_dim){
+
+	lib.summarize = function(doc, length, dim){
 		var sentences = lsi.splitSentences(doc);
 		var tdm = lsi.createTDM(sentences);
 		var svd = numeric.svd(tdm);
 		var norm = Math.log(lsi.frobeniusNormOne(svd.S));
-		var frdim = r_dim || lsi.chooseLowRank(tdm, svd);
+		var frdim = dim || lsi.chooseLowRank(tdm, svd);
 		var reduced = lsi.lowRankApprox(tdm, frdim, svd);
 		var ranking = lsi.rankDocs(reduced.svd, sentences);
 		var important = ranking.filter((val, i)=>{return i<(length || norm)});
@@ -43,8 +44,9 @@ var stemmer = stemmer || {};
 		return out;
 	};
 
-	lib.useCurrentTabText = function( callback, use_func ){
-		chrome.tabs.executeScript(null, {file: "content_sum.js"});
+	lib.useCurrentTabText = function( callback, ufunc ){
+		var use_func = ufunc || function(x){return x};
+		chrome.tabs.executeScript(null, {file: "content_grab.js"});
 		chrome.tabs.getSelected(null, function(tab) {
 			chrome.tabs.sendMessage(tab.id, message={method: "getText"}, sendResponse=function(response) {
 			    if(response.method=="getText"){
@@ -57,6 +59,27 @@ var stemmer = stemmer || {};
 
 	lib.summarizeCurrentTab = function( callback ){
 		lib.useCurrentTabText( callback, lib.summarize );
+	};
+
+	lib.summarizeCurrentWithWorker = function( callback, length, dim ){
+		lib.useCurrentTabText( function(result){
+			lib.summarizeWithWorker.call( this, result, callback, length, dim );
+		});
+	}
+
+	lib.summarizeWithWorker = function( alltext, callback, length, dim ){
+		var time_elapsed = 0;
+		var timer = setInterval(function(){time_elapsed ++; console.log("Time: ", time_elapsed);}, 1000);
+		var sum_worker = new Worker("summary_worker.js");
+		console.log("Starting worker.");
+		sum_worker.onmessage = function(e){
+			callback( e.data );
+			sum_worker.terminate();
+			sum_worker = undefined;
+			clearInterval(timer);
+			console.log("Worker completed work in", time_elapsed, "seconds");
+		};
+		sum_worker.postMessage( {text:alltext, summary_length:length||null, dimensions:dim||null} );
 	};
 
 })(summarizer);

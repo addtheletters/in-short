@@ -58,7 +58,7 @@ var stemmer = stemmer || {};
 		// /[^\.!\?]+[\.!\?$]+/g  // previous regex doing just pre-punctuation bits
 		// matches sentences ended with normal punctuation, isolated parentheticals with no punctuation nearby,
 		// independent lines lacking punctuation, and anything left before the end
-		return str.match( /(\([^\(\)]+\))|([^\r\n.!?]+([.!?]+|$))/gim ).map( (stnce)=>( stnce.replace(/\s+/g, " ").trim()) ).filter( (val)=>(val) );
+		return str.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).map( (stnce)=>( stnce.replace(/\s+/g, " ").trim()) ).filter( (val)=>(val) );
 	};
 
 	lib.weight = lib.weight || {};
@@ -222,7 +222,7 @@ var stemmer = stemmer || {};
 
 	lib.chooseLowRank = function(tdm, svd){
 		var norm = Math.log(lib.frobeniusNormOne(svd.S));
-		return Math.max(norm, Math.min(tdm.DOCS.length / 100, 5) );
+		return Math.max(norm, norm * Math.min(tdm.DOCS.length / 200, 5) );
 	};
 
 	lib.lowRankApprox = function(matrix, rank, svd){

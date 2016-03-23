@@ -82,14 +82,22 @@ var big_text = "r by r singular values matrix S, and a n by r concept-document v
 
 function test_summary(){
 	return summarizer.summarize(big_text);	
-}
+};
+
+function test_summary_callback( summary ){
+	console.log("Summarized as: " + numeric.prettyPrint(summary));
+	render( "Summarized as the following: " + numeric.prettyPrint(summary) );
+	last_result = summary;
+};
 
 function test_tab_summary(){
-	summarizer.summarizeCurrentTab( function( summary ){
-		console.log("Summarized as: " + numeric.prettyPrint(summary));
-		render( "Summarized as the following: " + numeric.prettyPrint(summary) );
-		last_result = summary;
-	});
+	render("Starting summarization...");
+	summarizer.summarizeCurrentTab( test_summary_callback );
+}
+
+function test_worker_summary(){
+	render("Starting summarization...");
+	summarizer.summarizeCurrentWithWorker( test_summary_callback );
 }
 
 function render(lsi_info_out){
@@ -103,5 +111,5 @@ document.addEventListener('DOMContentLoaded', function() {
 	// console.log(numeric.prettyPrint(last_result));
 	// report     += numeric.prettyPrint(last_result);
 	// render(report);
-	test_tab_summary();
+	test_worker_summary();
 });
