@@ -58,6 +58,8 @@ var stemmer = stemmer || {};
 		// /[^\.!\?]+[\.!\?$]+/g  // previous regex doing just pre-punctuation bits
 		// matches sentences ended with normal punctuation, isolated parentheticals with no punctuation nearby,
 		// independent lines lacking punctuation, and anything left before the end
+		//////////////////////////////////////////////////////////////////////////
+		// this regex fails when .?! are used mid-sentence to designate things. 
 		return str.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).map( (stnce)=>( stnce.replace(/\s+/g, " ").trim()) ).filter( (val)=>(val) );
 	};
 
