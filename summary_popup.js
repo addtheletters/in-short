@@ -1,4 +1,3 @@
-var DIFFBOT_TOKEN = "DEFINITELY NOT A TOKEN";
 
 // for god's sake, sanitize loadedText 
 function hideLoadIndicator( indicator_id, loadedText ){
@@ -40,16 +39,7 @@ function requestArticleInfo(){
 	useCurrentURL( 
 		function( retreived_url ){
 			console.log("using url", retreived_url);
-			var client = new Diffbot(DIFFBOT_TOKEN);
-			client.article.get({
-					url:retreived_url, // encodeURIComponent(retreived_url);
-				},
-				onInfoGathered,
-				function onError(response){
-					console.log(INFO_GATHER_FAILED);
-					fillContent("page-info", INFO_GATHER_FAILED);
-				}
-			);
+			// request!
 		}
 	);
 }
