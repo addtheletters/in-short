@@ -32,6 +32,7 @@ var stemmer = stemmer || {};
 			if(i>0) out.summary += " ";
 			out.summary += important[i].content;
 		}
+
 		console.log(reduced);
 		console.log(numeric.prettyPrint(reduced));
 

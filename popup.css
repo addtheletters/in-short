@@ -1,15 +1,22 @@
 body {
     font-family: monospace;
     font-size: 18px;
-    width: 500px;
+    width: 700px;
 }
 button{
     font-family: monospace;
     font-size: 18pt;
 }
+p{
+    font-size: 14px;
+}
+.hovering {
+    background-color: black !important;
+    color:white;
+}
 .centered {
     position: relative;
-    max-width: 1400px;
+    max-width: 1000px;
     height: auto;
     margin: auto;
     padding: 10px;
@@ -19,6 +26,11 @@ button{
     transition: visibility 0s 2s, opacity 1s ease;
     opacity:0;
     visibility: hidden;
+    transition-duration: 1s;
+}
+.gone{
+    display: none;
+    transition-duration: 1s;
 }
 .info{
     box-shadow: 3px 5px 10px 1px gray;
@@ -27,10 +39,11 @@ button{
     background-color: rgba(0, 210, 0, .6);
 }
 .disabled{
-    background-color: rgba(210, 0, 0, .6);
+    background-color: rgba(210, 0, 0, .6) !important;
 }
 .transitive{
     transition: 1s ease;
+    transition-duration: 1s;
 }
 label{
     transition: 1s ease;
