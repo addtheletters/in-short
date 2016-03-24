@@ -48,7 +48,17 @@ var stemmer = stemmer || {};
 			{currentWindow:true, active:true},
 			function(tabs) {
 				//console.log("for tabs, doing", callback, ufunc);
-				chrome.tabs.executeScript(tabs[0].id, {file: "content_grab.js"});
+				chrome.tabs.executeScript(tabs[0].id, {file: "content_grab.js"}, function(cb){
+					if(chrome.extension.lastError || cb === undefined){
+						var errorMsg = chrome.extension.lastError.message;
+				        var ret = {failed:true, msg:errorMsg};
+						if (errorMsg == "Cannot access a chrome:// URL"){
+				            ret.bad_url = true;
+				        }
+						callback(ret);
+					}
+				});
+
 				if(methodo == "getReadableText"){
 					//console.log("method is getReadableText");
 					chrome.tabs.executeScript(tabs[0].id, {file: "lib/readabilitySAX/readabilitySAX.js"});

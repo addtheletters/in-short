@@ -34,6 +34,7 @@ p{
 }
 .info{
     box-shadow: 3px 5px 10px 1px gray;
+    padding: 4px;
 }
 .enabled{
     background-color: rgba(0, 210, 0, .6);

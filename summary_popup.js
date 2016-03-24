@@ -1,5 +1,5 @@
 var article_text  = null;
-var done_readable = false;
+var done_readable_sum = false;
 var done_raw      = false;
 var summary_working = false;
 
@@ -45,8 +45,8 @@ function onSummaryDone( summary_data ){
 	summary_working = false;
 	var sb = document.getElementById("summary-button")
 	sb.classList.remove("disabled");
-	if(!done_readable){
-		done_readable = true;
+	if(!done_readable_sum){
+		done_readable_sum = true;
 		enableIndicator( "summary-button", "Done! Redo with raw page text contents?");
 	}
 	else{
@@ -72,9 +72,16 @@ function requestReadable(){
 }
 
 function onReceiveReadable( article_info ){
+	if(article_info.failed){
+		fillContent('finding-text-indicator', '[Failed to find readable text.]');
+		activateSummaryButton( article_info );
+	}
+
 	console.log(article_info);
 	article_text = article_info.text;
 	enableIndicator('finding-text-indicator', '[Readable text found! '+article_text.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).length+' sentences.]')
+
+	activateSummaryButton( true );
 }
 
 // var INFO_GATHER_FAILED_NORE = "Failed to gather article information (API did not respond).";
@@ -96,10 +103,23 @@ function onReceiveReadable( article_info ){
 // 
 
 
-document.addEventListener('DOMContentLoaded', function(){
-	requestReadable();
-
+function activateSummaryButton( readable ){
 	var summary_button = document.getElementById("summary-button");
+
+	if(readable.failed){
+		if(readable.bad_url){
+			summary_button.innerHTML = "This page cannot be summarized.";
+			summary_button.classList.add("disabled");
+			return;
+		}
+		else{
+			summary_button.innerHTML = "Summarize with raw text content!";
+			done_readable_sum = true;
+		}
+	}
+	else{
+		summary_button.innerHTML = "Summarize readable text!";
+	}
 
 	summary_button.onmouseover = function(){
 		if(!summary_working){
@@ -120,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function(){
 			return;
 		}
 
-		if(done_readable){
+		if(done_readable_sum){
 			requestCurrentSummary();
 			summary_working = true;
 			summary_button.classList.remove("enabled");
@@ -132,11 +152,15 @@ document.addEventListener('DOMContentLoaded', function(){
 			fillContent("summary-button", "Summarizing...");
 		}
 		else{
-			fillContent("summary-box", "No article text has been found. Try the raw text?");
-			done_readable = true;
+			fillContent("summary-button", "No article text has been found. Try the raw text?");
+			done_readable_sum = true;
 		}
 		//requestArticleInfo();
 		//requestSummary("HELLO SIR! MY NAME IS BOB. I HAVE A CAT. HE LIKES TO MEOW. MEOW MEOW MIX IS MY FAVORITE CAT FOOD. I AM DEFINITELY NOT A CAT.");
 		//function(){hideLoadIndicator('diffbot-query-indicator', '[Response received!]')};
 	}
+};
+
+document.addEventListener('DOMContentLoaded', function(){
+	requestReadable();
 });
