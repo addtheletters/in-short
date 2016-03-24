@@ -108,7 +108,7 @@ function test_worker_summary(){
 
 function test_worker_readability(){
 	render("Starting readability test...");
-	summarizer.readablizeCurrent( test_readability_callback, 3 );
+	summarizer.readablizeCurrent( test_readability_callback );
 }
 
 function render(lsi_info_out){

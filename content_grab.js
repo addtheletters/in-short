@@ -9,7 +9,7 @@ chrome.runtime.onMessage.addListener(
 			sendResponse({data: readable.getArticle().getText(), method:"getReadableText"});
 		}
 		// I guess this should be implemented at some point for proper summaries
-		else if(message.method=="getAPIResponse"){
+		if(message.method=="getAPIResponse"){
 			sendResponse({data: "UNIMPLEMENTED", method: "getAPIResponse"});
 		}
 	}

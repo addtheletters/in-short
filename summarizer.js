@@ -50,15 +50,15 @@ var stemmer = stemmer || {};
 		chrome.tabs.query(
 			{currentWindow:true, active:true},
 			function(tabs) {
-				console.log("for tabs, doing", callback, ufunc);
+				//console.log("for tabs, doing", callback, ufunc);
 				chrome.tabs.executeScript(tabs[0].id, {file: "content_grab.js"});
 				if(methodo == "getReadableText"){
-					console.log("method is getReadableText");
+					//console.log("method is getReadableText");
 					chrome.tabs.executeScript(tabs[0].id, {file: "lib/readabilitySAX/readabilitySAX.js"});
 				}
 				chrome.tabs.sendMessage(tabs[0].id, message={method: methodo},
 					sendResponse=function(response) {
-						console.log("responding", response);
+						//console.log("responding", response);
 					    if(response.method==methodo){
 				            content = response.data;
 				            //console.log("got tab content", content)
@@ -75,8 +75,8 @@ var stemmer = stemmer || {};
 	};
 
 	lib.readablizeCurrent = function( callback ){
-		console.log("abusing current tab", callback);
-		lib.useCurrentTab( callback, (x)=>(x), "getReadableText" );
+		//console.log("abusing current tab", callback);
+		lib.useCurrentTab( callback, null, "getReadableText" );
 	}
 
 	lib.summarizeCurrentTab = function( callback ){
@@ -105,30 +105,5 @@ var stemmer = stemmer || {};
 		};
 		sum_worker.postMessage( {text:alltext, summary_length:length||null, dimensions:dim||null} );
 	};
-
-
-
-	// lib.readablizeWithWorker = function( docu, callback, skiplevely ){
-	// 	var time_elapsed = 0;
-	// 	var timer = setInterval(function(){time_elapsed ++; console.log("Time: ", time_elapsed);}, 1000);
-
-	// 	var read_worker = new Worker("readability_worker.js");
-	// 	read_worker.onmessage = function(e){
-	// 		callback(e.data);
-	// 		read_worker.terminate();
-	// 		read_worker = undefined;
-
-	// 		clearInterval(timer);
-	// 		console.log("Worker completed work in", time_elapsed, "seconds");
-	// 	};
-	// 	console.log("radddy", {doc:docu, skiplevel:skiplevely||null});
-	// 	read_worker.postMessage( {doc:docu, skiplevel:skiplevely||null} );
-	// };
-
-	// lib.readablizeCurrent = function( callback, skiplevel ){
-	// 	lib.useCurrentTabDoc( function(result){
-	// 		lib.readablizeWithWorker.call(this, result, callback, skiplevel);
-	// 	});
-	// };
 
 })(summarizer);
