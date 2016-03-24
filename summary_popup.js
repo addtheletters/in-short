@@ -71,9 +71,10 @@ function requestReadable(){
 	summarizer.readablizeCurrent( onReceiveReadable );
 }
 
-function onReceiveReadable( text ){
-	article_text = text;
-	enableIndicator('finding-text-indicator', '[Readable text found! '+text.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).length+' sentences.]')
+function onReceiveReadable( article_info ){
+	console.log(article_info);
+	article_text = article_info.text;
+	enableIndicator('finding-text-indicator', '[Readable text found! '+article_text.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).length+' sentences.]')
 }
 
 // var INFO_GATHER_FAILED_NORE = "Failed to gather article information (API did not respond).";

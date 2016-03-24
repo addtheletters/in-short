@@ -10,38 +10,34 @@ var stemmer = stemmer || {};
 (function(lib){
 
 	lib.summarize = function(doc, length, dim){
-		var sentences = lsi.splitSentences(doc);
-		var tdm = lsi.createTDM(sentences);
-		var svd = numeric.svd(tdm);
-		var norm = Math.log(lsi.frobeniusNormOne(svd.S));
-		var frdim = dim || lsi.chooseLowRank(tdm, svd);
-		var reduced = lsi.lowRankApprox(tdm, frdim, svd);
-		var ranking = lsi.rankDocs(reduced.svd, sentences);
-		var important = ranking.filter((val, i)=>{return i<(length || norm)});
-		console.log("unsorted important", important);
-		important = important.sort( (a, b)=>{
-			//console.log("b content index", sentences.indexOf(b.content));
-			//console.log("a content index", sentences.indexOf(a.content));
-			return sentences.indexOf(a.content) - sentences.indexOf(b.content);
-		} );
-		console.log("sorted important", important);
 
 		var out = {};
-		out.summary = "";
-		for(var i = 0; i < important.length; i++){
+		out.original  = doc;
+		out.sentences = lsi.splitSentences(doc);
+		out.tdm       = lsi.createTDM(out.sentences);
+		out.svd       = numeric.svd(out.tdm);
+		out.norm      = Math.log(lsi.frobeniusNormOne(out.svd.S));
+		out.frdim     = dim || lsi.chooseLowRank(out.tdm, out.svd);
+		out.reduced   = lsi.lowRankApprox(out.tdm, out.frdim, out.svd);
+		out.ranking   = lsi.rankDocs(out.reduced.svd, out.sentences);
+		out.important = out.ranking.filter((val, i)=>{return i<(length || out.norm)});
+		out.summary   = "",
+
+		//console.log("unsorted important", out.important);
+		out.important = out.important.sort( (a, b)=>{
+			//console.log("b content index", sentences.indexOf(b.content));
+			//console.log("a content index", sentences.indexOf(a.content));
+			return out.sentences.indexOf(a.content) - out.sentences.indexOf(b.content);
+		} );
+		//console.log("sorted important", out.important);
+
+		for(var i = 0; i < out.important.length; i++){
 			if(i>0) out.summary += " ";
-			out.summary += important[i].content;
+			out.summary += out.important[i].content;
 		}
 
-		console.log(reduced);
-		console.log(numeric.prettyPrint(reduced));
-
-		out.sentences = sentences;
-		out.tdm = tdm;
-		out.norm = norm;
-		out.reduced = reduced;
-		out.ranking = ranking;
-		out.original = doc;
+		//console.log(out.reduced);
+		//console.log(numeric.prettyPrint(out.reduced));
 		return out;
 	};
 
@@ -78,7 +74,7 @@ var stemmer = stemmer || {};
 	lib.readablizeCurrent = function( callback ){
 		//console.log("abusing current tab", callback);
 		lib.useCurrentTab( callback, null, "getReadableText" );
-	}
+	};
 
 	lib.summarizeCurrentTab = function( callback ){
 		lib.useCurrentTabText( function(result){
@@ -105,6 +101,10 @@ var stemmer = stemmer || {};
 			console.log("Worker completed work in", time_elapsed, "seconds");
 		};
 		sum_worker.postMessage( {text:alltext, summary_length:length||null, dimensions:dim||null} );
+	};
+
+	lib.diffbotCurrent = function( callback ){
+
 	};
 
 })(summarizer);

@@ -5,8 +5,14 @@ chrome.runtime.onMessage.addListener(
 		}
 		if(message.method=="getReadableText"){
 			//console.log("document is",document);
-			var readable = new Readability(document, null, 2);
-			sendResponse({data: readable.getArticle().getText(), method:"getReadableText"});
+			var readable = new Readability(document, null, 1);
+			var selected = {};
+			selected.article = readable.getArticle();
+			//selected.articleText = readable.getArticle().getText();
+			//selected.textArticle = readable.getArticle("text");
+			selected.text = readable.getText();
+			selected.title = readable.getTitle();
+			sendResponse({data: selected, method:"getReadableText"});
 		}
 		// I guess this should be implemented at some point for proper summaries
 		if(message.method=="getAPIResponse"){
