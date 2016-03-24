@@ -47,14 +47,19 @@ var stemmer = stemmer || {};
 	lib.useCurrentTabText = function( callback, ufunc ){
 		var use_func = ufunc || function(x){return x};
 		chrome.tabs.executeScript(null, {file: "content_grab.js"});
-		chrome.tabs.getSelected(null, function(tab) {
-			chrome.tabs.sendMessage(tab.id, message={method: "getText"}, sendResponse=function(response) {
-			    if(response.method=="getText"){
-		            alltext = response.data;
-		            callback( use_func(alltext) );
-		        }
-			});
-	    });
+		chrome.tabs.query(
+			{currentWindow:true, active:true},
+			function(tabs) {
+				chrome.tabs.sendMessage(tabs[0].id, message={method: "getText"},
+					sendResponse=function(response) {
+					    if(response.method=="getText"){
+				            alltext = response.data;
+				            callback( use_func(alltext) );
+				        }
+					}
+				);
+	    	}
+	    );
 	};
 
 	lib.summarizeCurrentTab = function( callback ){
