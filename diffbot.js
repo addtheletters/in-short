@@ -541,7 +541,7 @@ var JSONP = (function (document) {
             src += (src.indexOf('?') + 1 ? '&' : '?');
 
             var head = document.getElementsByTagName('head')[0],
-                script = document.createElement('script'),
+                //script = document.createElement('script'),
                 params = [],
                 requestId = requests,
                 param;
