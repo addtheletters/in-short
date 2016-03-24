@@ -32,25 +32,36 @@ function useCurrentURL( callback ){
 	);
 }
 
-var INFO_GATHER_FAILED_NORE = "Failed to gather article information (API did not respond).";
 
-function requestArticleInfo(){
-	console.log("attempting request");
-	useCurrentURL( 
-		function( retreived_url ){
-			console.log("using url", retreived_url);
-			// request!
-		}
-	);
-}
+// var INFO_GATHER_FAILED_NORE = "Failed to gather article information (API did not respond).";
 
-function onInfoGathered( response ){
-	console.log("Received API response!", response);
-}
+// function requestArticleInfo(){
+// 	console.log("attempting request");
+// 	useCurrentURL( 
+// 		function( retreived_url ){
+// 			console.log("using url", retreived_url);
+// 			//
+// 		}
+// 	);
+// }
+
+
+// function onInfoGathered( response ){
+// 	console.log("Received response!", response);
+// }
+// 
+
+var article_text = null;
 
 document.addEventListener('DOMContentLoaded', function(){
 	document.getElementById("summary-button").onclick = function(){
-		requestArticleInfo();
+		if(article_text){
+			requestSummary(article_text);
+		}
+		else{
+			fillContent("summary-box", "No article text has been found.");
+		}
+		//requestArticleInfo();
 		//requestSummary("HELLO SIR! MY NAME IS BOB. I HAVE A CAT. HE LIKES TO MEOW. MEOW MEOW MIX IS MY FAVORITE CAT FOOD. I AM DEFINITELY NOT A CAT.");
 		//function(){hideLoadIndicator('diffbot-query-indicator', '[Response received!]')};
 	}

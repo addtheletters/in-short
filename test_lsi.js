@@ -88,7 +88,13 @@ function test_summary_callback( summary ){
 	console.log("Summarized as: " + numeric.prettyPrint(summary));
 	render( "Summarized as the following: " + numeric.prettyPrint(summary) );
 	last_result = summary;
-};
+}
+
+function test_readability_callback( article ){
+	console.log("readablized as", numeric.prettyPrint(article));
+	render("readablized as " + numeric.prettyPrint(article));
+	last_result = article;
+}
 
 function test_tab_summary(){
 	render("Starting summarization...");
@@ -98,6 +104,11 @@ function test_tab_summary(){
 function test_worker_summary(){
 	render("Starting summarization...");
 	summarizer.summarizeCurrentWithWorker( test_summary_callback );
+}
+
+function test_worker_readability(){
+	render("Starting readability test...");
+	summarizer.readablizeCurrent( test_readability_callback, 3 );
 }
 
 function render(lsi_info_out){
@@ -111,5 +122,5 @@ document.addEventListener('DOMContentLoaded', function() {
 	// console.log(numeric.prettyPrint(last_result));
 	// report     += numeric.prettyPrint(last_result);
 	// render(report);
-	test_worker_summary();
+	test_worker_readability();
 });

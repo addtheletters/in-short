@@ -44,33 +44,52 @@ var stemmer = stemmer || {};
 		return out;
 	};
 
-	lib.useCurrentTabText = function( callback, ufunc ){
+	lib.useCurrentTab = function(callback, ufunc, methodo){
+		console.log("using current tab to do", methodo);
 		var use_func = ufunc || function(x){return x};
-		chrome.tabs.executeScript(null, {file: "content_grab.js"});
 		chrome.tabs.query(
 			{currentWindow:true, active:true},
 			function(tabs) {
-				chrome.tabs.sendMessage(tabs[0].id, message={method: "getText"},
+				console.log("for tabs, doing", callback, ufunc);
+				chrome.tabs.executeScript(tabs[0].id, {file: "content_grab.js"});
+				if(methodo == "getReadableText"){
+					console.log("method is getReadableText");
+					chrome.tabs.executeScript(tabs[0].id, {file: "lib/readabilitySAX/readabilitySAX.js"});
+				}
+				chrome.tabs.sendMessage(tabs[0].id, message={method: methodo},
 					sendResponse=function(response) {
-					    if(response.method=="getText"){
-				            alltext = response.data;
-				            callback( use_func(alltext) );
+						console.log("responding", response);
+					    if(response.method==methodo){
+				            content = response.data;
+				            //console.log("got tab content", content)
+				            callback( use_func(content) );
 				        }
 					}
 				);
 	    	}
 	    );
+	}
+
+	lib.useCurrentTabText = function( callback, ufunc ){
+		lib.useCurrentTab( callback, ufunc, "getText" );
 	};
 
+	lib.readablizeCurrent = function( callback ){
+		console.log("abusing current tab", callback);
+		lib.useCurrentTab( callback, (x)=>(x), "getReadableText" );
+	}
+
 	lib.summarizeCurrentTab = function( callback ){
-		lib.useCurrentTabText( callback, lib.summarize );
+		lib.useCurrentTabText( function(result){
+			callback( lib.summarize(result) );
+		});
 	};
 
 	lib.summarizeCurrentWithWorker = function( callback, length, dim ){
 		lib.useCurrentTabText( function(result){
 			lib.summarizeWithWorker.call( this, result, callback, length, dim );
 		});
-	}
+	};
 
 	lib.summarizeWithWorker = function( alltext, callback, length, dim ){
 		var time_elapsed = 0;
@@ -86,5 +105,30 @@ var stemmer = stemmer || {};
 		};
 		sum_worker.postMessage( {text:alltext, summary_length:length||null, dimensions:dim||null} );
 	};
+
+
+
+	// lib.readablizeWithWorker = function( docu, callback, skiplevely ){
+	// 	var time_elapsed = 0;
+	// 	var timer = setInterval(function(){time_elapsed ++; console.log("Time: ", time_elapsed);}, 1000);
+
+	// 	var read_worker = new Worker("readability_worker.js");
+	// 	read_worker.onmessage = function(e){
+	// 		callback(e.data);
+	// 		read_worker.terminate();
+	// 		read_worker = undefined;
+
+	// 		clearInterval(timer);
+	// 		console.log("Worker completed work in", time_elapsed, "seconds");
+	// 	};
+	// 	console.log("radddy", {doc:docu, skiplevel:skiplevely||null});
+	// 	read_worker.postMessage( {doc:docu, skiplevel:skiplevely||null} );
+	// };
+
+	// lib.readablizeCurrent = function( callback, skiplevel ){
+	// 	lib.useCurrentTabDoc( function(result){
+	// 		lib.readablizeWithWorker.call(this, result, callback, skiplevel);
+	// 	});
+	// };
 
 })(summarizer);
