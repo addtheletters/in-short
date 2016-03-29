@@ -1,8 +1,8 @@
-var article_text  = null;
+// everyone loves global variables
+var article_text      = null;
 var done_readable_sum = false;
-var done_raw      = false;
-var summary_working = false;
-
+var done_raw          = false;
+var summary_working   = false;
 
 function enableIndicator( indicator_id, loadedText ){
 	var replacetext = loadedText || "[loaded!]";
@@ -72,7 +72,7 @@ function requestReadable(){
 }
 
 function onReceiveReadable( article_info ){
-	if(article_info.failed){
+	if(!article_info || article_info.failed){
 		fillContent('finding-text-indicator', '[Failed to find readable text.]');
 		activateSummaryButton( article_info );
 	}
@@ -82,6 +82,12 @@ function onReceiveReadable( article_info ){
 	enableIndicator('finding-text-indicator', '[Readable text found! '+article_text.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).length+' sentences.]')
 
 	activateSummaryButton( true );
+}
+
+function onReceiveDiffbot( diffbot_objects ){
+	if(!diffbot_objects || diffbot_objects.failed){
+		
+	}
 }
 
 // var INFO_GATHER_FAILED_NORE = "Failed to gather article information (API did not respond).";

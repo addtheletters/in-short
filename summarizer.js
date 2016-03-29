@@ -63,6 +63,10 @@ var stemmer = stemmer || {};
 					//console.log("method is getReadableText");
 					chrome.tabs.executeScript(tabs[0].id, {file: "lib/readabilitySAX/readabilitySAX.js"});
 				}
+				if(methodo == "getAPIResponse"){
+					chrome.tabs.executeScript(tabs[0].id, {file: "loadAuthToken.js"});	
+				}
+
 				chrome.tabs.sendMessage(tabs[0].id, message={method: methodo},
 					sendResponse=function(response) {
 						//console.log("responding", response);
@@ -84,6 +88,10 @@ var stemmer = stemmer || {};
 	lib.readablizeCurrent = function( callback ){
 		//console.log("abusing current tab", callback);
 		lib.useCurrentTab( callback, null, "getReadableText" );
+	};
+
+	lib.diffbotCurrent = function( callback ){
+		lib.useCurrentTab( callback, null, "getAPIResponse" );
 	};
 
 	lib.summarizeCurrentTab = function( callback ){
@@ -111,10 +119,6 @@ var stemmer = stemmer || {};
 			console.log("Worker completed work in", time_elapsed, "seconds");
 		};
 		sum_worker.postMessage( {text:alltext, summary_length:length||null, dimensions:dim||null} );
-	};
-
-	lib.diffbotCurrent = function( callback ){
-
 	};
 
 })(summarizer);
