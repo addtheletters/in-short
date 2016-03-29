@@ -69,11 +69,12 @@ var stemmer = stemmer || {};
 
 				chrome.tabs.sendMessage(tabs[0].id, message={method: methodo},
 					sendResponse=function(response) {
-						//console.log("responding", response);
-					    if(response.method==methodo){
+						console.log("responding", response);
+					    if(response.method==methodo && !(response.data == "wait") ){
 				            content = response.data;
 				            //console.log("got tab content", content)
 				            callback( use_func(content) );
+				            console.log("sendResponse callback done");
 				        }
 					}
 				);

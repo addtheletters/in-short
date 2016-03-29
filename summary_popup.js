@@ -1,4 +1,5 @@
 // everyone loves global variables
+var article_info	  = null;
 var article_text      = null;
 var done_readable_sum = false;
 var done_raw          = false;
@@ -71,23 +72,33 @@ function requestReadable(){
 	summarizer.readablizeCurrent( onReceiveReadable );
 }
 
-function onReceiveReadable( article_info ){
-	if(!article_info || article_info.failed){
+function onReceiveReadable( readable_info ){
+	if(!readable_info || readable_info.failed){
 		fillContent('finding-text-indicator', '[Failed to find readable text.]');
-		activateSummaryButton( article_info );
+		activateSummaryButton( readable_info );
+		return;
 	}
 
-	console.log(article_info);
+	article_info = readable_info;
+	//console.log(article_info);
 	article_text = article_info.text;
-	enableIndicator('finding-text-indicator', '[Readable text found! '+article_text.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).length+' sentences.]')
-
+	enableIndicator('finding-text-indicator', '[Readable text found! '+article_text.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).length+' sentences.]');
 	activateSummaryButton( true );
 }
 
+function requestDiffbot(){
+	summarizer.diffbotCurrent( onReceiveDiffbot );
+}
+
 function onReceiveDiffbot( diffbot_objects ){
+	console.log(diffbot_objects);
 	if(!diffbot_objects || diffbot_objects.failed){
-		
+		var err = diffbot_objects.failed ?  '('+diffbot_objects.reason+')' : "";
+		fillContent('finding-text-indicator', '[Failed to get Diffbot analysis. ' + err + ']');
+		activateSummaryButton( diffbot_objects );
+		return;
 	}
+	console.log(diffbot_objects);
 }
 
 // var INFO_GATHER_FAILED_NORE = "Failed to gather article information (API did not respond).";
@@ -168,5 +179,6 @@ function activateSummaryButton( readable ){
 };
 
 document.addEventListener('DOMContentLoaded', function(){
-	requestReadable();
+	//requestReadable();
+	requestDiffbot();
 });

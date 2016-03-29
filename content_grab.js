@@ -23,57 +23,53 @@ chrome.runtime.onMessage.addListener(
 		// I guess this should be implemented at some point for proper summaries
 		if(message.method=="getAPIResponse"){
 
-			var errored = function(reason){
-				sendResponse({failed:true, method:"getAPIResponse", reason:reason});
+			var errored = function( e ){
+				console.log("errored with", e);
+				sendResponse({method:"getAPIResponse",
+					data:{failed:true, reason:e}
+				});
+				return true;
 			};
 
-			var tkn = message.data.authToken || DIFFBOT_TKN;
+			var tkn = message.authToken || DIFFBOT_TKN;
 			if(!tkn){
-				errored("no-token");
+				return errored("no-token");
 			}
 
 			var xhr = new XMLHttpRequest();
-			var apiUrl = getAPIUrl();
+			var apiUrl = getAPIUrl(tkn, document.URL || window.location.href);
+			console.log("made api url", apiUrl);
 
 			xhr.open("GET", apiUrl, true);
             xhr.timeout = 40000;
             xhr.responseType = "json";
-            xhr.onreadystatechange = function() {
+
+            xhr.onreadystatechange = function(){
                 if (xhr.readyState === 4) { // xhr completed
                     var status = xhr.status;
+                    console.log("xhr status", status);
                     if (status === 200) {
-                    	var rsponse = JSON.parse(xhr.response);
-                    	if('error' in rsponse || !rsponse.objects || rsponse.objects.length <= 0){
-                    		errored('bad response');
+                    	var rsponse = xhr.response;
+                    	console.log("xhr response", rsponse);
+                    	if('error' in rsponse){
+                    		return errored(rsponse.error);
+                    	}
+                    	if(!rsponse.objects || rsponse.objects.length <= 0){
+                    		return errored('bad response');
                     	}
                     	sendResponse( {data:rsponse.objects, method:"getAPIResponse"} );
-                        // var _resp = JSON.parse(xhr.responseText);
-                        // if (!('error' in _resp)
-                        //         && 'objects' in _resp
-                        //         && _resp['objects'].length > 0) {
-                        //     var articles = [];
-                        //     for (var i = 0; i < _resp['objects'].length; i++) {
-                        //         var object = _resp['objects'][i];
-                        //         if ('type' in object && object['type'] === 'article') {
-                        //             articles.push(object);
-                        //         }
-                        //     }
-                        //     if (articles.length > 0) {
-                        //         var article = articles[0];
-                        //         sendResponse({data:article, method:"getAPIResponse"});
-                        //     }
-                        // }
                     }
                     else{
                     	errored("code " + status);
                     }
                 }
             };
-            xhr.ontimeout = function () {
-                errored("timeout");
+            xhr.ontimeout = function(){
+                return errored("timeout");
             };
-            xhr.send();
-			//sendResponse({data: "UNIMPLEMENTED", method: "getAPIResponse"});
+            console.log("sending...");
+            xhr.send(); 
+			return true; // to allow for longer-term async, supposedly
 		}
 	}
 );
