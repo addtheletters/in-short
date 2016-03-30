@@ -90,35 +90,22 @@ function requestDiffbot(){
 	summarizer.diffbotCurrent( onReceiveDiffbot );
 }
 
-function onReceiveDiffbot( diffbot_objects ){
-	console.log(diffbot_objects);
-	if(!diffbot_objects || diffbot_objects.failed){
-		var err = diffbot_objects.failed ?  '('+diffbot_objects.reason+')' : "";
+function onReceiveDiffbot( diffbot_object ){
+	console.log(diffbot_object);
+	if(!diffbot_object || diffbot_object.failed){
+		var err = diffbot_object.failed ?  '('+diffbot_object.reason+')' : "";
 		fillContent('finding-text-indicator', '[Failed to get Diffbot analysis. ' + err + ']');
-		activateSummaryButton( diffbot_objects );
+		activateSummaryButton( diffbot_object );
 		return;
 	}
-	console.log(diffbot_objects);
+
+	article_info = diffbot_object;
+	article_text = article_info.text;
+	enableIndicator('finding-text-indicator', '[Diffbot information retreived! '+article_text.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).length+' sentences.]');
+	activateSummaryButton(true);
 }
 
-// var INFO_GATHER_FAILED_NORE = "Failed to gather article information (API did not respond).";
-
-// function requestArticleInfo(){
-// 	console.log("attempting request");
-// 	useCurrentURL( 
-// 		function( retreived_url ){
-// 			console.log("using url", retreived_url);
-// 			//
-// 		}
-// 	);
-// }
-
-
-// function onInfoGathered( response ){
-// 	console.log("Received response!", response);
-// }
-// 
-
+// TODO: make UI more dynamic, more buttons, more pretty
 
 function activateSummaryButton( readable ){
 	var summary_button = document.getElementById("summary-button");
