@@ -51,7 +51,7 @@ var stemmer = stemmer || {};
 				chrome.tabs.executeScript(tabs[0].id, {file: "content_grab.js"}, function(cb){
 					if(chrome.extension.lastError || cb === undefined){
 						var errorMsg = chrome.extension.lastError.message;
-				        var ret = {failed:true, msg:errorMsg};
+				        var ret = {failed:true, reason:errorMsg};
 						if (errorMsg == "Cannot access a chrome:// URL"){
 				            ret.bad_url = true;
 				        }

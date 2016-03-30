@@ -240,6 +240,10 @@ var stemmer = stemmer || {};
 		return Math.max(norm, norm * Math.min(tdm.DOCS.length / 200, 5) );
 	};
 
+	// TODO:
+	// on large documents, doing a full SVD is SLOW. 
+	// need to find an implementation / implement myself a
+	// reduced-dimensionality SVD.
 	lib.lowRankApprox = function(matrix, rank, svd){
 		if(rank <= 0){
 			console.log("rank for low rank approximation is invalid or zero");
