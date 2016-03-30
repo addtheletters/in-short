@@ -30,7 +30,7 @@ if(!grabberLoaded){
 					sendResponse({method:"getAPIResponse",
 						data:{failed:true, reason:e}
 					});
-					return true;
+					return true; //false; if this errors, does it need to wait for async responses? maybe
 				};
 
 				var tkn = message.authToken || DIFFBOT_TKN;
