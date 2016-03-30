@@ -72,9 +72,7 @@ var stemmer = stemmer || {};
 						console.log("responding", response);
 					    if(response.method==methodo && !(response.data == "wait") ){
 				            content = response.data;
-				            //console.log("got tab content", content)
 				            callback( use_func(content) );
-				            console.log("sendResponse callback done");
 				        }
 					}
 				);
@@ -109,9 +107,12 @@ var stemmer = stemmer || {};
 
 	lib.summarizeWithWorker = function( alltext, callback, length, dim ){
 		var time_elapsed = 0;
-		var timer = setInterval(function(){time_elapsed ++; console.log("Time: ", time_elapsed);}, 1000);
+		var timer = setInterval(function(){
+			time_elapsed ++;
+			console.log("Worker time:", time_elapsed);
+		}, 1000);
 		var sum_worker = new Worker("summary_worker.js");
-		console.log("Starting worker.");
+		console.log("Starting summarization worker.");
 		sum_worker.onmessage = function(e){
 			callback( e.data );
 			sum_worker.terminate();

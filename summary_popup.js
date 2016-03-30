@@ -80,7 +80,7 @@ function onReceiveReadable( readable_info ){
 	}
 
 	article_info = readable_info;
-	//console.log(article_info);
+	article_info.TYPE = "READABILITY";
 	article_text = article_info.text;
 	enableIndicator('finding-text-indicator', '[Readable text found! '+lsi.sentence_matcher(article_text).length+' sentences.]');
 	activateSummaryButton( true );
@@ -91,7 +91,7 @@ function requestDiffbot(){
 }
 
 function onReceiveDiffbot( diffbot_object ){
-	console.log(diffbot_object);
+	//console.log(diffbot_object);
 	if(!diffbot_object || diffbot_object.failed){
 		var err = diffbot_object.failed ?  '('+diffbot_object.reason+')' : "";
 		fillContent('finding-text-indicator', '[Failed to get Diffbot analysis. ' + err + ']');
@@ -100,6 +100,7 @@ function onReceiveDiffbot( diffbot_object ){
 	}
 
 	article_info = diffbot_object;
+	article_info.TYPE = "DIFFBOT";
 	article_text = article_info.text;
 	enableIndicator('finding-text-indicator', '[Diffbot information retreived! '+lsi.sentence_matcher(article_text).length+' sentences.]');
 	activateSummaryButton(true);

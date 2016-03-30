@@ -26,7 +26,7 @@ if(!grabberLoaded){
 			if(message.method=="getAPIResponse"){
 
 				var errored = function( e ){
-					console.log("errored with", e);
+					//console.log("errored with", e);
 					sendResponse({method:"getAPIResponse",
 						data:{failed:true, reason:e}
 					});
@@ -40,19 +40,15 @@ if(!grabberLoaded){
 
 				var xhr = new XMLHttpRequest();
 				var apiUrl = getAPIUrl(tkn, document.URL || window.location.href);
-				console.log("made api url", apiUrl);
 
 				xhr.open("GET", apiUrl, true);
 	            xhr.timeout = 40000;
 	            xhr.responseType = "json";
-
 	            xhr.onreadystatechange = function(){
 	                if (xhr.readyState === 4) { // xhr completed
 	                    var status = xhr.status;
-	                    console.log("xhr status", status);
 	                    if (status === 200) {
 	                    	var rsponse = xhr.response;
-	                    	console.log("xhr response", rsponse);
 	                    	if('error' in rsponse){
 	                    		return errored(rsponse.error);
 	                    	}
@@ -69,7 +65,6 @@ if(!grabberLoaded){
 	            xhr.ontimeout = function(){
 	                return errored("timeout");
 	            };
-	            console.log("sending...");
 	            xhr.send(); 
 				return true; // to allow for longer-term async, supposedly
 			}
