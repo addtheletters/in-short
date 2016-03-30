@@ -23,7 +23,6 @@ if(!grabberLoaded){
 				sendResponse({data: selected, method:"getReadableText"});
 				return;
 			}
-			// I guess this should be implemented at some point for proper summaries
 			if(message.method=="getAPIResponse"){
 
 				var errored = function( e ){
@@ -63,7 +62,7 @@ if(!grabberLoaded){
 	                    	sendResponse( {data:rsponse.objects[0], method:"getAPIResponse"} );
 	                    }
 	                    else{
-	                    	errored("code " + status);
+	                    	return errored("code " + status);
 	                    }
 	                }
 	            };
@@ -80,5 +79,5 @@ if(!grabberLoaded){
 	grabberLoaded = true;
 }
 else{
-	console.log("Attempted to reload grabber. Refresh page?");
+	console.log("Attempted to reload grabber, already existed. Refresh the page?");
 }
