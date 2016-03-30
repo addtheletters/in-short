@@ -82,7 +82,7 @@ function onReceiveReadable( readable_info ){
 	article_info = readable_info;
 	//console.log(article_info);
 	article_text = article_info.text;
-	enableIndicator('finding-text-indicator', '[Readable text found! '+article_text.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).length+' sentences.]');
+	enableIndicator('finding-text-indicator', '[Readable text found! '+lsi.sentence_matcher(article_text).length+' sentences.]');
 	activateSummaryButton( true );
 }
 
@@ -101,7 +101,7 @@ function onReceiveDiffbot( diffbot_object ){
 
 	article_info = diffbot_object;
 	article_text = article_info.text;
-	enableIndicator('finding-text-indicator', '[Diffbot information retreived! '+article_text.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).length+' sentences.]');
+	enableIndicator('finding-text-indicator', '[Diffbot information retreived! '+lsi.sentence_matcher(article_text).length+' sentences.]');
 	activateSummaryButton(true);
 }
 

@@ -54,13 +54,26 @@ var stemmer = stemmer || {};
 		return stems;
 	};
 
+	// /[^\.!\?]+[\.!\?$]+/g  // previous regex doing just pre-punctuation bits
+	// matches sentences ended with normal punctuation, isolated parentheticals with no punctuation nearby,
+	// independent lines lacking punctuation, and anything left before the end
+	//////////////////////////////////////////////////////////////////////////
+	// this regex fails when .?! are used mid-sentence to designate things. (titles, decimal numbers)
+	// regex also fails with some parentheticals and quotes, though it should capture endquotes / parens
+	// dear god kill it before it keeps growing
+	
+	lib.sentence_matcher = function(text){
+		return text.match(/(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+\)?"?'?)|$))/gim);
+	}
+
+	// new matcher credited to http://stackoverflow.com/questions/18914629/split-string-into-sentences-in-javascript
+	// needs testing to see if results are better than the previous one, though. Some strangeness happening that makes it fail.
+	// lib.sentence_matcher = function(text){
+	// 	return text.replace(/([.?!])\s*(?=[A-Z])/gim, "$1|").split("|");
+	// }
+
 	lib.splitSentences = function(str){
-		// /[^\.!\?]+[\.!\?$]+/g  // previous regex doing just pre-punctuation bits
-		// matches sentences ended with normal punctuation, isolated parentheticals with no punctuation nearby,
-		// independent lines lacking punctuation, and anything left before the end
-		//////////////////////////////////////////////////////////////////////////
-		// this regex fails when .?! are used mid-sentence to designate things. 
-		return str.match( /(\([^\(\)]+\))|([^\r\n.!?]+(([.!?]+"?'?)|$))/gim ).map( (stnce)=>( stnce.replace(/\s+/g, " ").trim()) ).filter( (val)=>(val) );
+		return lib.sentence_matcher(str).map( (stnce)=>( stnce.replace(/\s+/g, " ").trim()) ).filter( (val)=>(val) );
 	};
 
 	lib.weight = lib.weight || {};
