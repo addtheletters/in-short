@@ -1,4 +1,5 @@
 var grabberLoaded;
+var infoCache = infoCache || {};
 
 if(!grabberLoaded){
 	var getAPIUrl = function(token, url) {
@@ -68,6 +69,23 @@ if(!grabberLoaded){
 	            xhr.send(); 
 				return true; // to allow for longer-term async, supposedly
 			}
+			if(message.method=="useCache"){
+				var status = false;
+				var retinfo = false;
+				if(message.data && message.data.key){
+					status = "ok";
+					if(message.data.info){
+						infoCache[message.data.key] = message.data.info;
+						status = "updated";
+					}
+					retinfo = infoCache[message.data.key];
+				}
+				sendResponse({method:"useCache", data:{info:retinfo, status:status}});
+				return;
+			}
+			// this then raises the question of, "Why isn't the summary worker just launched from the content script?"
+			// to which I would reply
+			// "I don't know but shouldn't the summarizer.js be doing the summarizing"
 		}
 	);
 

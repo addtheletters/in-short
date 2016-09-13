@@ -9,6 +9,13 @@ var stemmer = stemmer || {};
 
 (function(lib){
 
+	lib.OPSTRINGS = {
+		puretext:"getText",
+		readability:"getReadableText",
+		diffbot:"getAPIResponse",
+		cache:"useCache"
+	};
+
 	lib.summarize = function(doc, length, dim){
 
 		var out = {};
@@ -41,7 +48,7 @@ var stemmer = stemmer || {};
 		return out;
 	};
 
-	lib.useCurrentTab = function(callback, ufunc, methodo){
+	lib.useCurrentTab = function(callback, ufunc, methodo, datao){
 		console.log("using current tab to do", methodo);
 		var use_func = ufunc || function(x){return x};
 		chrome.tabs.query(
@@ -59,15 +66,15 @@ var stemmer = stemmer || {};
 					}
 				});
 
-				if(methodo == "getReadableText"){
+				if(methodo == lib.OPSTRINGS.readability){
 					//console.log("method is getReadableText");
 					chrome.tabs.executeScript(tabs[0].id, {file: "lib/readabilitySAX/readabilitySAX.js"});
 				}
-				if(methodo == "getAPIResponse"){
+				if(methodo == lib.OPSTRINGS.diffbot){
 					chrome.tabs.executeScript(tabs[0].id, {file: "loadAuthToken.js"});	
 				}
 
-				chrome.tabs.sendMessage(tabs[0].id, message={method: methodo},
+				chrome.tabs.sendMessage(tabs[0].id, message={method: methodo, data:datao},
 					sendResponse=function(response) {
 						console.log("responding", response);
 					    if(response.method==methodo && !(response.data == "wait") ){
@@ -81,16 +88,24 @@ var stemmer = stemmer || {};
 	}
 
 	lib.useCurrentTabText = function( callback, ufunc ){
-		lib.useCurrentTab( callback, ufunc, "getText" );
+		lib.useCurrentTab( callback, ufunc, lib.OPSTRINGS.puretext );
+	};
+
+	lib.cacheInPage = function( callback, key, info ){
+		lib.useCurrentTab( callback, null, lib.OPSTRINGS.cache, {key:key, info:info} );
+	};
+
+	lib.fetchCache = function( callback, key ){
+		lib.cacheInPage( callback, key );
 	};
 
 	lib.readablizeCurrent = function( callback ){
 		//console.log("abusing current tab", callback);
-		lib.useCurrentTab( callback, null, "getReadableText" );
+		lib.useCurrentTab( callback, null, lib.OPSTRINGS.readability );
 	};
 
 	lib.diffbotCurrent = function( callback ){
-		lib.useCurrentTab( callback, null, "getAPIResponse" );
+		lib.useCurrentTab( callback, null, lib.OPSTRINGS.diffbot );
 	};
 
 	lib.summarizeCurrentTab = function( callback ){
@@ -121,6 +136,34 @@ var stemmer = stemmer || {};
 			console.log("Worker completed work in", time_elapsed, "seconds");
 		};
 		sum_worker.postMessage( {text:alltext, summary_length:length||null, dimensions:dim||null} );
+	};
+
+
+	lib.OPFUNCS = {
+		puretext:lib.useCurrentTabText,
+		readability:lib.readablizeCurrent,
+		diffbot:lib.diffbotCurrent,
+		cache:lib.cacheInPage
+	};
+
+	lib.cache = {};
+
+	lib.cache.getKey = function( op ){
+		return lib.OPSTRINGS[op] || op;
+	}
+
+	lib.cache.operate = function( callback, operation ){
+		function onCacheAnswer( data ){
+			if(data.status){
+				callback( data.info );
+			}else{
+				lib.OPFUNCS[operation]( function(info){
+					lib.cacheInPage( function(){return;}, lib.cache.getKey(operation), info);
+					callback(info);
+				});
+			}
+		}
+		lib.fetchCache( onCacheAnswer, operation );
 	};
 
 })(summarizer);
