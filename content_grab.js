@@ -56,6 +56,7 @@ if(!grabberLoaded){
 	                    	if(!rsponse.objects || rsponse.objects.length <= 0){
 	                    		return errored('bad response');
 	                    	}
+	                    	// when is this cached?
 	                    	sendResponse( {data:rsponse.objects[0], method:"getAPIResponse"} );
 	                    }
 	                    else{
@@ -80,6 +81,7 @@ if(!grabberLoaded){
 					}
 					retinfo = infoCache[message.data.key];
 				}
+				console.log("Content grab sent back cache response.");
 				sendResponse({method:"useCache", data:{info:retinfo, status:status}});
 				return;
 			}

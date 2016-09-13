@@ -77,7 +77,7 @@ var stemmer = stemmer || {};
 				chrome.tabs.sendMessage(tabs[0].id, message={method: methodo, data:datao},
 					sendResponse=function(response) {
 						console.log("responding", response);
-					    if(response.method==methodo && !(response.data == "wait") ){
+					    if(response.method==methodo && !(response.data == "wait") ){	
 				            content = response.data;
 				            callback( use_func(content) );
 				        }
@@ -154,11 +154,12 @@ var stemmer = stemmer || {};
 
 	lib.cache.operate = function( callback, operation ){
 		function onCacheAnswer( data ){
+			console.log("Cache answer was", data);
 			if(data.status){
 				callback( data.info );
 			}else{
 				lib.OPFUNCS[operation]( function(info){
-					lib.cacheInPage( function(){return;}, lib.cache.getKey(operation), info);
+					lib.cacheInPage( function(){return;}, lib.cache.getKey(operation), info); // this should cache
 					callback(info);
 				});
 			}
